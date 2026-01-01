@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react';
 import type { Session, Player, Match, AppScreen, SkillLevel, UndoAction } from '../types';
-import { saveSession, loadSession, clearSession, generateId, saveLocation } from '../utils/storage';
+import { saveSession, loadSession, clearSession, generateId, saveLocation, updatePlayerStats } from '../utils/storage';
 import { selectNextFourPlayers, formTeams, createMatch, findSubstitute } from '../utils/matching';
 
 interface SessionState {
@@ -15,6 +15,7 @@ type SessionAction =
   | { type: 'SET_LOCATION'; location: string }
   | { type: 'SET_COURTS'; courts: number }
   | { type: 'ADD_PLAYER'; name: string }
+  | { type: 'ADD_PLAYER_WITH_SKILL'; name: string; skill: SkillLevel }
   | { type: 'REMOVE_PLAYER'; playerId: string }
   | { type: 'SET_PLAYER_SKILL'; playerId: string; skill: SkillLevel }
   | { type: 'CHECK_IN_PLAYER'; playerId: string }
@@ -146,6 +147,28 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
       };
     }
 
+    case 'ADD_PLAYER_WITH_SKILL': {
+      const newPlayer: Player = {
+        id: generateId(),
+        name: action.name.trim(),
+        skill: action.skill,
+        status: 'not-here',
+        gamesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        lastPartner: null,
+        courtsPlayed: [],
+        checkedInAt: null,
+      };
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          players: [...state.session.players, newPlayer],
+        },
+      };
+    }
+
     case 'REMOVE_PLAYER':
       return {
         ...state,
@@ -203,7 +226,13 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
       return fillAvailableCourts(startedState);
     }
 
-    case 'END_SESSION':
+    case 'END_SESSION': {
+      // Save player stats to the persistent database
+      for (const player of state.session.players) {
+        if (player.gamesPlayed > 0) {
+          updatePlayerStats(player.name, player.skill, player.wins, player.losses);
+        }
+      }
       return {
         ...state,
         session: {
@@ -212,6 +241,7 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
         },
         screen: 'leaderboard',
       };
+    }
 
     case 'RECORD_WINNER': {
       const match = state.session.activeMatches.find(m => m.id === action.matchId);
@@ -432,6 +462,7 @@ interface SessionContextValue {
   setLocation: (location: string) => void;
   setCourts: (courts: number) => void;
   addPlayer: (name: string) => void;
+  addPlayerWithSkill: (name: string, skill: SkillLevel) => void;
   removePlayer: (playerId: string) => void;
   setPlayerSkill: (playerId: string, skill: SkillLevel) => void;
   checkInPlayer: (playerId: string) => void;
@@ -510,6 +541,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_COURTS', courts }), []),
     addPlayer: useCallback((name: string) =>
       dispatch({ type: 'ADD_PLAYER', name }), []),
+    addPlayerWithSkill: useCallback((name: string, skill: SkillLevel) =>
+      dispatch({ type: 'ADD_PLAYER_WITH_SKILL', name, skill }), []),
     removePlayer: useCallback((playerId: string) =>
       dispatch({ type: 'REMOVE_PLAYER', playerId }), []),
     setPlayerSkill: useCallback((playerId: string, skill: SkillLevel) =>
