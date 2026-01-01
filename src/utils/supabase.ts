@@ -141,7 +141,7 @@ export async function joinVenue(slug: string, password: string): Promise<{ succe
   return { success: true, venue };
 }
 
-// Sync cloud locations to localStorage
+// Sync cloud locations to localStorage (replaces local data - cloud is authoritative)
 async function syncLocationsToLocal(venueId: string): Promise<void> {
   if (!supabase) return;
 
@@ -151,26 +151,13 @@ async function syncLocationsToLocal(venueId: string): Promise<void> {
     .eq('venue_id', venueId)
     .order('created_at', { ascending: false });
 
-  if (error || !data || data.length === 0) return;
+  if (error || !data) return;
 
-  // Get existing local locations
-  const localKey = 'dinksync_locations';
-  const existingData = localStorage.getItem(localKey);
-  const existingLocations: Array<{ name: string; courts: number }> = existingData
-    ? JSON.parse(existingData)
-    : [];
-
-  // Merge: cloud locations take precedence, then add any local-only ones
-  const cloudNames = new Set(data.map((loc) => loc.name.toLowerCase()));
-  const localOnly = existingLocations.filter(
-    (loc) => !cloudNames.has(loc.name.toLowerCase())
-  );
-
-  const merged = [...data, ...localOnly].slice(0, 10);
-  localStorage.setItem(localKey, JSON.stringify(merged));
+  // Replace local with cloud data (no merge to prevent cross-venue contamination)
+  localStorage.setItem('dinksync_locations', JSON.stringify(data));
 }
 
-// Sync cloud roster to localStorage players
+// Sync cloud roster to localStorage players (replaces local data - cloud is authoritative)
 async function syncRosterToLocal(venueId: string): Promise<void> {
   if (!supabase) return;
 
@@ -180,22 +167,9 @@ async function syncRosterToLocal(venueId: string): Promise<void> {
     .eq('venue_id', venueId)
     .order('last_played_at', { ascending: false });
 
-  if (error || !data || data.length === 0) return;
+  if (error || !data) return;
 
-  // Get existing local players
-  const localKey = 'dinksync_players';
-  const existingData = localStorage.getItem(localKey);
-  const existingPlayers: Array<{
-    id: string;
-    name: string;
-    skill: number | null;
-    lifetimeWins: number;
-    lifetimeLosses: number;
-    lifetimeGames: number;
-    lastPlayed: number | null;
-  }> = existingData ? JSON.parse(existingData) : [];
-
-  // Convert cloud players to local format
+  // Convert cloud players to local format and replace (no merge to prevent cross-venue contamination)
   const cloudPlayers = data.map((p) => ({
     id: crypto.randomUUID(),
     name: p.name,
@@ -206,14 +180,7 @@ async function syncRosterToLocal(venueId: string): Promise<void> {
     lastPlayed: p.last_played_at ? new Date(p.last_played_at).getTime() : null,
   }));
 
-  // Merge: cloud players take precedence (more accurate stats)
-  const cloudNames = new Set(cloudPlayers.map((p) => p.name.toLowerCase()));
-  const localOnly = existingPlayers.filter(
-    (p) => !cloudNames.has(p.name.toLowerCase())
-  );
-
-  const merged = [...cloudPlayers, ...localOnly];
-  localStorage.setItem(localKey, JSON.stringify(merged));
+  localStorage.setItem('dinksync_players', JSON.stringify(cloudPlayers));
 }
 
 // Get venue by slug (for public leaderboard)

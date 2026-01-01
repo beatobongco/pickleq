@@ -131,8 +131,12 @@ export function VenueSetupScreen() {
   };
 
   const handleDisconnect = () => {
-    if (confirm('Are you sure? This will disconnect this device from the venue.')) {
+    if (confirm('Are you sure? This will disconnect this device and clear synced data.')) {
       clearLocalVenue();
+      // Clear synced data to prevent mixing with other venues
+      localStorage.removeItem('dinksync_players');
+      localStorage.removeItem('dinksync_locations');
+      localStorage.removeItem('dinksync_session');
       showLanding?.();
     }
   };
