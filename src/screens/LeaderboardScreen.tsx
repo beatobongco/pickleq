@@ -5,10 +5,12 @@ import { getSkillLabel } from '../components/SkillSelector';
 import { ShareModal } from '../components/ShareModal';
 import { calculateLeaderboard, getWinPercentage } from '../utils/matching';
 import { announceLeaderboard } from '../utils/speech';
+import { getLocalVenue } from '../utils/supabase';
 import type { Player } from '../types';
 
 export function LeaderboardScreen() {
-  const { session, newSession } = useSession();
+  const { session, newSession, syncedSessionId } = useSession();
+  const venue = getLocalVenue();
   const hasAnnounced = useRef(false);
 
   const leaderboard = calculateLeaderboard(session.players);
@@ -65,6 +67,38 @@ export function LeaderboardScreen() {
             </div>
           </div>
         </div>
+
+        {/* Shareable Session Link */}
+        {venue && syncedSessionId && (
+          <div className="bg-green-100 rounded-2xl p-4 shadow-sm mb-6">
+            <div className="text-center">
+              <div className="text-sm font-semibold text-green-800 mb-2">
+                📱 Share this session with players!
+              </div>
+              <div className="bg-white rounded-lg px-3 py-2 text-sm font-mono text-gray-700 break-all">
+                {window.location.origin}/venue/{venue.slug}/session/{syncedSessionId}
+              </div>
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/venue/${venue.slug}/session/${syncedSessionId}`;
+                  navigator.clipboard.writeText(url);
+                }}
+                className="mt-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Copy Link
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Syncing indicator */}
+        {venue && !syncedSessionId && (
+          <div className="bg-gray-100 rounded-2xl p-4 shadow-sm mb-6 text-center">
+            <div className="text-sm text-gray-500">
+              ⏳ Syncing session to cloud...
+            </div>
+          </div>
+        )}
 
         {/* Leaderboard */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">

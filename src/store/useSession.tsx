@@ -3,12 +3,13 @@ import { createContext, useContext, useReducer, useEffect, useCallback, type Rea
 import type { Session, Player, Match, AppScreen, SkillLevel, UndoAction } from '../types';
 import { saveSession, loadSession, clearSession, generateId, saveLocation, updatePlayerStats } from '../utils/storage';
 import { selectNextFourPlayers, formTeams, createMatch, findSubstitute } from '../utils/matching';
-import { syncSessionStats, processSyncQueue, getLocalVenue } from '../utils/supabase';
+import { createSessionAndSync, processSyncQueue, getLocalVenue } from '../utils/supabase';
 
 interface SessionState {
   session: Session;
   screen: AppScreen;
   undoAction: UndoAction | null;
+  syncedSessionId: string | null;
 }
 
 type SessionAction =
@@ -29,7 +30,8 @@ type SessionAction =
   | { type: 'SET_UNDO'; action: UndoAction | null }
   | { type: 'UNDO_WINNER'; matchId: string }
   | { type: 'NEW_SESSION' }
-  | { type: 'FILL_COURTS' };
+  | { type: 'FILL_COURTS' }
+  | { type: 'SET_SYNCED_SESSION_ID'; sessionId: string | null };
 
 function createInitialSession(): Session {
   return {
@@ -243,20 +245,8 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
         }
       }
 
-      // Sync to Supabase if venue is configured
-      if (getLocalVenue()) {
-        const playersToSync = state.session.players
-          .filter(p => p.gamesPlayed > 0)
-          .map(p => ({
-            name: p.name,
-            skill: p.skill,
-            wins: p.wins,
-            losses: p.losses,
-            gamesPlayed: p.gamesPlayed,
-          }));
-        // Fire and forget - don't block UI
-        syncSessionStats(playersToSync).catch(console.error);
-      }
+      // Note: Supabase sync is handled by the SessionProvider via effect
+      // to allow setting the synced session ID after async operation
 
       return {
         ...state,
@@ -265,6 +255,7 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
           endTime: Date.now(),
         },
         screen: 'leaderboard',
+        syncedSessionId: null, // Will be set after async sync
       };
     }
 
@@ -466,10 +457,14 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
         session: createInitialSession(),
         screen: 'setup',
         undoAction: null,
+        syncedSessionId: null,
       };
 
     case 'FILL_COURTS':
       return fillAvailableCourts(state);
+
+    case 'SET_SYNCED_SESSION_ID':
+      return { ...state, syncedSessionId: action.sessionId };
 
     default:
       return state;
@@ -480,6 +475,7 @@ interface SessionContextValue {
   session: Session;
   screen: AppScreen;
   undoAction: UndoAction | null;
+  syncedSessionId: string | null;
   checkedInCount: number;
   canStartSession: boolean;
   queue: Player[];
@@ -517,12 +513,14 @@ function getInitialState(): SessionState {
       session: saved,
       screen,
       undoAction: null,
+      syncedSessionId: null,
     };
   }
   return {
     session: createInitialSession(),
     screen: 'setup',
     undoAction: null,
+    syncedSessionId: null,
   };
 }
 
@@ -549,6 +547,33 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [state.undoAction]);
 
+  // Sync to Supabase when session ends
+  useEffect(() => {
+    if (state.session.endTime && !state.syncedSessionId && getLocalVenue()) {
+      const syncSession = async () => {
+        const sessionId = await createSessionAndSync({
+          location: state.session.location,
+          courts: state.session.courts,
+          totalGames: state.session.matches.length,
+          startedAt: state.session.startTime ? new Date(state.session.startTime).toISOString() : null,
+          players: state.session.players
+            .filter(p => p.gamesPlayed > 0)
+            .map(p => ({
+              name: p.name,
+              skill: p.skill,
+              wins: p.wins,
+              losses: p.losses,
+              gamesPlayed: p.gamesPlayed,
+            })),
+        });
+        if (sessionId) {
+          dispatch({ type: 'SET_SYNCED_SESSION_ID', sessionId });
+        }
+      };
+      syncSession().catch(console.error);
+    }
+  }, [state.session.endTime, state.syncedSessionId, state.session.location, state.session.courts, state.session.matches.length, state.session.startTime, state.session.players]);
+
   const checkedInCount = state.session.players.filter(
     p => p.status === 'checked-in' || p.status === 'playing'
   ).length;
@@ -561,6 +586,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     session: state.session,
     screen: state.screen,
     undoAction: state.undoAction,
+    syncedSessionId: state.syncedSessionId,
     checkedInCount,
     canStartSession,
     queue,

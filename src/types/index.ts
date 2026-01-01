@@ -60,3 +60,24 @@ export interface VenuePlayer {
   lifetimeGames: number;
   lastPlayedAt: string | null;
 }
+
+// Session types for shareable session URLs
+export interface VenueSession {
+  id: string;
+  venueId: string;
+  location: string;
+  courts: number;
+  totalGames: number;
+  startedAt: string | null;
+  endedAt: string;
+}
+
+export interface SessionPlayer {
+  id: string;
+  sessionId: string;
+  playerName: string;
+  skill: SkillLevel;
+  wins: number;
+  losses: number;
+  gamesPlayed: number;
+}
