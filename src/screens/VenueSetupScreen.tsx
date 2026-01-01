@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSession } from '../store/useSession';
+import { useLanding } from '../App';
 import { Button } from '../components/Button';
 import {
   getLocalVenue,
@@ -12,6 +13,7 @@ import {
 
 export function VenueSetupScreen() {
   const { setScreen } = useSession();
+  const showLanding = useLanding();
   const [mode, setMode] = useState<'create' | 'join'>('create');
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -131,13 +133,7 @@ export function VenueSetupScreen() {
   const handleDisconnect = () => {
     if (confirm('Are you sure? This will disconnect this device from the venue.')) {
       clearLocalVenue();
-      setName('');
-      setSlug('');
-      setPassword('');
-      setConfirmPassword('');
-      setJoinSlug('');
-      setJoinPassword('');
-      setIsAvailable(null);
+      showLanding?.();
     }
   };
 

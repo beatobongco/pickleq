@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { SessionProvider, useSession } from './store/useSession';
 import { SetupScreen } from './screens/SetupScreen';
 import { PlayScreen } from './screens/PlayScreen';
@@ -11,6 +11,10 @@ import { PublicSessionScreen } from './screens/PublicSessionScreen';
 import { LandingScreen } from './screens/LandingScreen';
 
 const HAS_VISITED_KEY = 'pickleq_has_visited';
+
+// Context for navigating back to landing page
+const LandingContext = createContext<(() => void) | null>(null);
+export const useLanding = () => useContext(LandingContext);
 
 function AppContent() {
   const { screen } = useSession();
@@ -87,11 +91,17 @@ function App() {
     return <LandingScreen onGetStarted={handleGetStarted} />;
   }
 
+  const handleShowLanding = () => {
+    setShowLanding(true);
+  };
+
   // Staff app with full session management
   return (
-    <SessionProvider>
-      <AppContent />
-    </SessionProvider>
+    <LandingContext.Provider value={handleShowLanding}>
+      <SessionProvider>
+        <AppContent />
+      </SessionProvider>
+    </LandingContext.Provider>
   );
 }
 
