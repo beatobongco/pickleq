@@ -8,6 +8,9 @@ import { PlayersScreen } from './screens/PlayersScreen';
 import { VenueSetupScreen } from './screens/VenueSetupScreen';
 import { PublicLeaderboardScreen } from './screens/PublicLeaderboardScreen';
 import { PublicSessionScreen } from './screens/PublicSessionScreen';
+import { LandingScreen } from './screens/LandingScreen';
+
+const HAS_VISITED_KEY = 'pickleq_has_visited';
 
 function AppContent() {
   const { screen } = useSession();
@@ -33,6 +36,10 @@ function AppContent() {
 function App() {
   const [venueSlug, setVenueSlug] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [showLanding, setShowLanding] = useState<boolean>(() => {
+    // Show landing if user hasn't visited before
+    return !localStorage.getItem(HAS_VISITED_KEY);
+  });
 
   useEffect(() => {
     // Handle GitHub Pages SPA redirect
@@ -60,6 +67,11 @@ function App() {
     }
   }, []);
 
+  const handleGetStarted = () => {
+    localStorage.setItem(HAS_VISITED_KEY, 'true');
+    setShowLanding(false);
+  };
+
   // Public session page (shareable session results)
   if (venueSlug && sessionId) {
     return <PublicSessionScreen slug={venueSlug} sessionId={sessionId} />;
@@ -68,6 +80,11 @@ function App() {
   // Public venue leaderboard (no session provider needed)
   if (venueSlug) {
     return <PublicLeaderboardScreen slug={venueSlug} />;
+  }
+
+  // Landing page for new visitors
+  if (showLanding) {
+    return <LandingScreen onGetStarted={handleGetStarted} />;
   }
 
   // Staff app with full session management
