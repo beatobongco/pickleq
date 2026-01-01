@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useSession } from '../store/useSession';
 import { getSavedLocations } from '../utils/storage';
+import { getLocalVenue } from '../utils/supabase';
 import { Button } from '../components/Button';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerPicker } from '../components/PlayerPicker';
@@ -22,6 +23,7 @@ export function SetupScreen() {
   } = useSession();
 
   const savedLocations = useMemo(() => getSavedLocations(), []);
+  const venue = useMemo(() => getLocalVenue(), []);
 
   const handleSelectLocation = (loc: { name: string; courts: number }) => {
     setLocation(loc.name);
@@ -42,6 +44,14 @@ export function SetupScreen() {
             <p className="text-gray-600 text-sm">Pickleball Open Play Manager</p>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setScreen('venue-setup')}
+              title="Venue Settings"
+            >
+              {venue ? '🌐' : '⚙️'}
+            </Button>
             <Button
               variant="secondary"
               size="sm"

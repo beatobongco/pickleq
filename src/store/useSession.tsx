@@ -3,6 +3,7 @@ import { createContext, useContext, useReducer, useEffect, useCallback, type Rea
 import type { Session, Player, Match, AppScreen, SkillLevel, UndoAction } from '../types';
 import { saveSession, loadSession, clearSession, generateId, saveLocation, updatePlayerStats } from '../utils/storage';
 import { selectNextFourPlayers, formTeams, createMatch, findSubstitute } from '../utils/matching';
+import { syncSessionStats, processSyncQueue, getLocalVenue } from '../utils/supabase';
 
 interface SessionState {
   session: Session;
@@ -241,6 +242,22 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
           updatePlayerStats(player.name, player.skill, player.wins, player.losses);
         }
       }
+
+      // Sync to Supabase if venue is configured
+      if (getLocalVenue()) {
+        const playersToSync = state.session.players
+          .filter(p => p.gamesPlayed > 0)
+          .map(p => ({
+            name: p.name,
+            skill: p.skill,
+            wins: p.wins,
+            losses: p.losses,
+            gamesPlayed: p.gamesPlayed,
+          }));
+        // Fire and forget - don't block UI
+        syncSessionStats(playersToSync).catch(console.error);
+      }
+
       return {
         ...state,
         session: {
@@ -516,6 +533,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     saveSession(state.session);
   }, [state.session]);
+
+  // Process any queued syncs on startup (for offline recovery)
+  useEffect(() => {
+    processSyncQueue().catch(console.error);
+  }, []);
 
   // Auto-clear undo after 10 seconds
   useEffect(() => {

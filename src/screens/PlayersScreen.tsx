@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
-import { SkillSelector, getSkillLabel } from '../components/SkillSelector';
+import { SkillSelector } from '../components/SkillSelector';
 import {
   getSavedPlayers,
   updateSavedPlayerSkill,

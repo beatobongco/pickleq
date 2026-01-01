@@ -35,10 +35,28 @@ export interface Session {
   endTime: number | null;
 }
 
-export type AppScreen = 'setup' | 'play' | 'leaderboard' | 'global-leaderboard' | 'players';
+export type AppScreen = 'setup' | 'play' | 'leaderboard' | 'global-leaderboard' | 'players' | 'venue-setup';
 
 export interface UndoAction {
   type: 'winner' | 'checkin' | 'checkout' | 'remove';
   data: unknown;
   timestamp: number;
+}
+
+export interface Venue {
+  id: string;
+  slug: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface VenuePlayer {
+  id: string;
+  venueId: string;
+  name: string;
+  skill: SkillLevel;
+  lifetimeWins: number;
+  lifetimeLosses: number;
+  lifetimeGames: number;
+  lastPlayedAt: string | null;
 }
