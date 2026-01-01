@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSession } from '../store/useSession';
-import { getSavedLocations, searchPlayers, type SavedPlayer } from '../utils/storage';
+import { getSavedLocations } from '../utils/storage';
 import { Button } from '../components/Button';
 import { PlayerCard } from '../components/PlayerCard';
+import { PlayerPicker } from '../components/PlayerPicker';
 
 export function SetupScreen() {
   const {
@@ -20,42 +21,7 @@ export function SetupScreen() {
     setScreen,
   } = useSession();
 
-  const [newPlayerName, setNewPlayerName] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
   const savedLocations = useMemo(() => getSavedLocations(), []);
-
-  // Search for matching players as user types
-  const playerSuggestions = useMemo(() => {
-    if (!newPlayerName.trim() || newPlayerName.length < 2) return [];
-    const suggestions = searchPlayers(newPlayerName);
-    // Filter out players already in this session
-    const sessionPlayerNames = session.players.map(p => p.name.toLowerCase());
-    return suggestions.filter(s => !sessionPlayerNames.includes(s.name.toLowerCase()));
-  }, [newPlayerName, session.players]);
-
-  const handleAddPlayer = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPlayerName.trim()) {
-      // Check if there's an exact match in saved players to get their skill
-      const savedPlayer = playerSuggestions.find(
-        p => p.name.toLowerCase() === newPlayerName.trim().toLowerCase()
-      );
-      if (savedPlayer) {
-        addPlayerWithSkill(savedPlayer.name, savedPlayer.skill);
-      } else {
-        addPlayer(newPlayerName);
-      }
-      setNewPlayerName('');
-      setShowSuggestions(false);
-    }
-  };
-
-  const handleSelectSuggestion = (player: SavedPlayer) => {
-    addPlayerWithSkill(player.name, player.skill);
-    setNewPlayerName('');
-    setShowSuggestions(false);
-  };
 
   const handleSelectLocation = (loc: { name: string; courts: number }) => {
     setLocation(loc.name);
@@ -64,11 +30,7 @@ export function SetupScreen() {
 
   const notHerePlayers = session.players.filter(p => p.status === 'not-here');
   const checkedInPlayers = session.players.filter(p => p.status === 'checked-in');
-
-  const getWinRate = (player: SavedPlayer) => {
-    if (player.lifetimeGames === 0) return null;
-    return Math.round((player.lifetimeWins / player.lifetimeGames) * 100);
-  };
+  const sessionPlayerNames = session.players.map(p => p.name);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -160,61 +122,11 @@ export function SetupScreen() {
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Add Players
           </label>
-          <div className="relative">
-            <form onSubmit={handleAddPlayer} className="flex gap-2">
-              <input
-                type="text"
-                value={newPlayerName}
-                onChange={(e) => {
-                  setNewPlayerName(e.target.value);
-                  setShowSuggestions(true);
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => {
-                  // Delay to allow click on suggestion
-                  setTimeout(() => setShowSuggestions(false), 200);
-                }}
-                placeholder="Player name..."
-                className="flex-1 px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
-              />
-              <Button type="submit" variant="primary" size="lg" disabled={!newPlayerName.trim()}>
-                Add
-              </Button>
-            </form>
-
-            {/* Player suggestions dropdown */}
-            {showSuggestions && playerSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-16 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden">
-                <div className="px-3 py-2 bg-gray-50 border-b text-xs text-gray-500 font-medium">
-                  Previous Players
-                </div>
-                {playerSuggestions.map((player) => {
-                  const winRate = getWinRate(player);
-                  return (
-                    <button
-                      key={player.id}
-                      onClick={() => handleSelectSuggestion(player)}
-                      className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0 flex items-center justify-between"
-                    >
-                      <div>
-                        <span className="font-medium text-gray-900">{player.name}</span>
-                        {player.skill && (
-                          <span className="ml-2 text-yellow-500 text-sm">
-                            {'★'.repeat(player.skill)}
-                          </span>
-                        )}
-                      </div>
-                      {player.lifetimeGames > 0 && (
-                        <span className="text-sm text-gray-500">
-                          {winRate}% • {player.lifetimeGames} games
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <PlayerPicker
+            sessionPlayerNames={sessionPlayerNames}
+            onAddPlayer={addPlayer}
+            onAddPlayerWithSkill={addPlayerWithSkill}
+          />
         </section>
 
         {/* Checked In Players */}
