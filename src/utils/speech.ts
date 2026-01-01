@@ -56,9 +56,6 @@ export function announceNextMatch(
   const team2 = team2Names.join(' and ');
   const message = `Next match. Court ${court}: ${team1} versus ${team2}`;
   announce(message);
-  setTimeout(()=> {
-    announce(message)
-  }, 2000)
 }
 
 export function announceWinner(
