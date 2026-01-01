@@ -53,18 +53,18 @@ export function LeaderboardScreen() {
       <main className="max-w-2xl mx-auto px-4 pb-8">
         {/* Session Stats */}
         <div className="bg-white rounded-2xl p-4 shadow-sm mb-6">
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-3 gap-2 md:gap-4 text-center">
             <div>
-              <div className="text-3xl font-bold text-gray-900">{totalGames}</div>
-              <div className="text-sm text-gray-500">Games Played</div>
+              <div className="text-2xl md:text-3xl font-bold text-gray-900">{totalGames}</div>
+              <div className="text-xs md:text-sm text-gray-500">Games</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-gray-900">{sessionDuration}</div>
-              <div className="text-sm text-gray-500">Minutes</div>
+              <div className="text-2xl md:text-3xl font-bold text-gray-900">{sessionDuration}</div>
+              <div className="text-xs md:text-sm text-gray-500">Minutes</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-gray-900">{session.courts}</div>
-              <div className="text-sm text-gray-500">Courts Used</div>
+              <div className="text-2xl md:text-3xl font-bold text-gray-900">{session.courts}</div>
+              <div className="text-xs md:text-sm text-gray-500">Courts</div>
             </div>
           </div>
         </div>
@@ -87,7 +87,7 @@ export function LeaderboardScreen() {
                   const url = `${window.location.origin}/venue/${venue.slug}/session/${syncedSessionId}`;
                   navigator.clipboard.writeText(url);
                 }}
-                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                className="px-6 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors min-h-[44px]"
               >
                 Copy Link
               </button>

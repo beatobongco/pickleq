@@ -157,32 +157,32 @@ export function PlayScreen() {
               Waiting for {4 - queue.length} more player{4 - queue.length > 1 ? 's' : ''} to start next match
             </div>
           ) : null}
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[40vh] overflow-y-auto">
             {queue.map((player, index) => (
               <div
                 key={player.id}
-                className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl"
+                className="flex items-center gap-2 md:gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl"
               >
-                <span className="text-lg font-bold text-yellow-600 w-8">
+                <span className="text-lg font-bold text-yellow-600 w-8 flex-shrink-0">
                   #{index + 1}
                 </span>
-                <div className="flex-1">
-                  <span className="font-medium text-gray-900">{player.name}</span>
+                <div className="flex-1 min-w-0">
+                  <span className="font-medium text-gray-900 truncate block">{player.name}</span>
                   {player.skill && (
-                    <span className="ml-2 text-sm text-gray-500">
+                    <span className="text-xs text-gray-500">
                       <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
                       {' '}{getSkillLabel(player.skill)}
                     </span>
                   )}
                 </div>
-                <span className="text-sm text-gray-500">
-                  {player.gamesPlayed} games
+                <span className="text-xs md:text-sm text-gray-500 flex-shrink-0">
+                  {player.gamesPlayed}g
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => checkOutPlayer(player.id)}
-                  className="text-gray-500 hover:text-red-600"
+                  className="text-gray-500 hover:text-red-600 flex-shrink-0"
                 >
                   Leave
                 </Button>
