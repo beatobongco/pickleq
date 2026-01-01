@@ -96,7 +96,76 @@ export async function createVenue(slug: string, name: string, password: string):
   };
 
   setLocalVenue(venue);
+
+  // Migrate existing localStorage data to cloud
+  await migrateLocalDataToCloud(venue.id);
+
   return venue;
+}
+
+// Migrate existing localStorage players and locations to cloud when creating a venue
+async function migrateLocalDataToCloud(venueId: string): Promise<void> {
+  if (!supabase) return;
+
+  // Migrate players
+  const playersData = localStorage.getItem('dinksync_players');
+  if (playersData) {
+    try {
+      const players = JSON.parse(playersData) as Array<{
+        name: string;
+        skill: SkillLevel;
+        lifetimeWins: number;
+        lifetimeLosses: number;
+        lifetimeGames: number;
+      }>;
+
+      for (const player of players) {
+        // Only migrate players who have actually played
+        if (player.lifetimeGames > 0) {
+          await supabase.rpc('increment_player_stats', {
+            p_venue_id: venueId,
+            p_name: player.name,
+            p_skill: player.skill,
+            p_wins: player.lifetimeWins,
+            p_losses: player.lifetimeLosses,
+            p_games: player.lifetimeGames,
+          });
+        } else if (player.name) {
+          // For players who haven't played yet, just add to roster (ignore if exists)
+          await supabase.from('players').upsert({
+            venue_id: venueId,
+            name: player.name,
+            skill: player.skill,
+            lifetime_wins: 0,
+            lifetime_losses: 0,
+            lifetime_games: 0,
+          }, { onConflict: 'venue_id,name', ignoreDuplicates: true });
+        }
+      }
+      console.log(`Migrated ${players.length} players to cloud`);
+    } catch (err) {
+      console.error('Failed to migrate players:', err);
+    }
+  }
+
+  // Migrate locations
+  const locationsData = localStorage.getItem('dinksync_locations');
+  if (locationsData) {
+    try {
+      const locations = JSON.parse(locationsData) as Array<{ name: string; courts: number }>;
+
+      for (const location of locations) {
+        await supabase.from('locations').upsert({
+          venue_id: venueId,
+          name: location.name,
+          courts: location.courts,
+        }, { onConflict: 'venue_id,name', ignoreDuplicates: true });
+      }
+      console.log(`Migrated ${locations.length} locations to cloud`);
+    } catch (err) {
+      console.error('Failed to migrate locations:', err);
+    }
+  }
 }
 
 // Join existing venue with password
