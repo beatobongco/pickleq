@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
 import { getSkillLabel } from '../components/SkillSelector';
+import { ShareModal } from '../components/ShareModal';
 import { calculateLeaderboard, getWinPercentage } from '../utils/matching';
 import { announceLeaderboard } from '../utils/speech';
+import type { Player } from '../types';
 
 export function LeaderboardScreen() {
   const { session, newSession } = useSession();
@@ -26,6 +28,8 @@ export function LeaderboardScreen() {
       announceLeaderboard(topPlayers);
     }
   }, [leaderboard]);
+
+  const [sharePlayer, setSharePlayer] = useState<Player | null>(null);
 
   const getMedal = (index: number) => {
     if (index === 0) return '🥇';
@@ -123,6 +127,17 @@ export function LeaderboardScreen() {
                       </div>
                       <div className="text-xs text-gray-400">WIN RATE</div>
                     </div>
+
+                    {/* Share Button */}
+                    <button
+                      onClick={() => setSharePlayer(player)}
+                      className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      title="Share stats"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                    </button>
                   </div>
                 );
               })}
@@ -155,6 +170,22 @@ export function LeaderboardScreen() {
           </Button>
         </div>
       </main>
+
+      {/* Share Modal */}
+      {sharePlayer && (
+        <ShareModal
+          isOpen={true}
+          onClose={() => setSharePlayer(null)}
+          player={{
+            name: sharePlayer.name,
+            skill: sharePlayer.skill,
+            wins: sharePlayer.wins,
+            losses: sharePlayer.losses,
+            gamesPlayed: sharePlayer.gamesPlayed,
+          }}
+          location={session.location}
+        />
+      )}
     </div>
   );
 }
