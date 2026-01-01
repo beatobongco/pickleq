@@ -3,6 +3,7 @@ import { SetupScreen } from './screens/SetupScreen';
 import { PlayScreen } from './screens/PlayScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { GlobalLeaderboardScreen } from './screens/GlobalLeaderboardScreen';
+import { PlayersScreen } from './screens/PlayersScreen';
 
 function AppContent() {
   const { screen } = useSession();
@@ -16,6 +17,8 @@ function AppContent() {
       return <LeaderboardScreen />;
     case 'global-leaderboard':
       return <GlobalLeaderboardScreen />;
+    case 'players':
+      return <PlayersScreen />;
     default:
       return <SetupScreen />;
   }

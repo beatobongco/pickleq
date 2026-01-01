@@ -41,13 +41,22 @@ export function SetupScreen() {
             <h1 className="text-2xl font-bold text-gray-900">DinkSync</h1>
             <p className="text-gray-600 text-sm">Pickleball Open Play Manager</p>
           </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setScreen('global-leaderboard')}
-          >
-            Leaderboard
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setScreen('players')}
+            >
+              Players
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setScreen('global-leaderboard')}
+            >
+              Leaderboard
+            </Button>
+          </div>
         </div>
       </header>
 

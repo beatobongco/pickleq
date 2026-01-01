@@ -150,3 +150,27 @@ export function getOrCreateSavedPlayer(name: string): SavedPlayer | null {
   );
   return existing ?? null;
 }
+
+export function updateSavedPlayerSkill(playerId: string, skill: SkillLevel): void {
+  const players = getSavedPlayers();
+  const player = players.find(p => p.id === playerId);
+  if (player) {
+    player.skill = skill;
+    savePlayers(players);
+  }
+}
+
+export function updateSavedPlayerName(playerId: string, newName: string): void {
+  const players = getSavedPlayers();
+  const player = players.find(p => p.id === playerId);
+  if (player) {
+    player.name = newName.trim();
+    savePlayers(players);
+  }
+}
+
+export function deleteSavedPlayer(playerId: string): void {
+  const players = getSavedPlayers();
+  const filtered = players.filter(p => p.id !== playerId);
+  savePlayers(filtered);
+}
