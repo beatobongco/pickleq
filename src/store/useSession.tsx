@@ -200,18 +200,22 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
         },
       };
 
-    case 'CHECK_IN_PLAYER':
-      return {
+    case 'CHECK_IN_PLAYER': {
+      const isActiveSession = state.session.startTime !== null && state.session.endTime === null;
+      const newState = {
         ...state,
         session: {
           ...state.session,
           players: state.session.players.map(p =>
             p.id === action.playerId
-              ? { ...p, status: 'checked-in', checkedInAt: Date.now() }
+              ? { ...p, status: 'checked-in' as const, checkedInAt: Date.now() }
               : p
           ),
         },
       };
+      // Try to fill courts if session is active and there are enough players
+      return isActiveSession ? fillAvailableCourts(newState) : newState;
+    }
 
     case 'CHECK_OUT_PLAYER':
       return {
