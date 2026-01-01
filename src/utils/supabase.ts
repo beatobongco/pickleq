@@ -312,7 +312,7 @@ export async function syncSessionStats(
   }
 }
 
-// Direct upsert fallback (if RPC not available)
+// Atomic upsert using RPC function (prevents race conditions with multiple devices)
 async function upsertPlayerDirect(
   venueId: string,
   player: {
@@ -325,38 +325,14 @@ async function upsertPlayerDirect(
 ): Promise<void> {
   if (!supabase) return;
 
-  // Check if player exists
-  const { data: existing } = await supabase
-    .from('players')
-    .select('id, lifetime_wins, lifetime_losses, lifetime_games')
-    .eq('venue_id', venueId)
-    .eq('name', player.name)
-    .single();
-
-  if (existing) {
-    // Update existing player
-    await supabase
-      .from('players')
-      .update({
-        skill: player.skill,
-        lifetime_wins: existing.lifetime_wins + player.wins,
-        lifetime_losses: existing.lifetime_losses + player.losses,
-        lifetime_games: existing.lifetime_games + player.gamesPlayed,
-        last_played_at: new Date().toISOString(),
-      })
-      .eq('id', existing.id);
-  } else {
-    // Insert new player
-    await supabase.from('players').insert({
-      venue_id: venueId,
-      name: player.name,
-      skill: player.skill,
-      lifetime_wins: player.wins,
-      lifetime_losses: player.losses,
-      lifetime_games: player.gamesPlayed,
-      last_played_at: new Date().toISOString(),
-    });
-  }
+  await supabase.rpc('increment_player_stats', {
+    p_venue_id: venueId,
+    p_name: player.name,
+    p_skill: player.skill,
+    p_wins: player.wins,
+    p_losses: player.losses,
+    p_games: player.gamesPlayed,
+  });
 }
 
 // Process queued syncs (call on app startup or when online)
