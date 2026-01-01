@@ -4,6 +4,7 @@ import { Button } from '../components/Button';
 import { CourtCard } from '../components/CourtCard';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerPicker } from '../components/PlayerPicker';
+import { getSkillLabel } from '../components/SkillSelector';
 import { UndoToast } from '../components/UndoToast';
 import { getPlayersWhoHaventPlayedRecently } from '../utils/matching';
 import { announceNextMatch, announceWinner } from '../utils/speech';
@@ -168,9 +169,9 @@ export function PlayScreen() {
                 <div className="flex-1">
                   <span className="font-medium text-gray-900">{player.name}</span>
                   {player.skill && (
-                    <span className="ml-2 text-yellow-500">
-                      {'★'.repeat(player.skill)}
-                      <span className="text-gray-300">{'★'.repeat(3 - player.skill)}</span>
+                    <span className="ml-2 text-sm text-gray-500">
+                      <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
+                      {' '}{getSkillLabel(player.skill)}
                     </span>
                   )}
                 </div>

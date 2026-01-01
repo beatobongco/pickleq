@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Button } from './Button';
+import { getSkillLabel } from './SkillSelector';
 import { getSavedPlayers, type SavedPlayer } from '../utils/storage';
 import type { SkillLevel } from '../types';
 
@@ -70,15 +71,6 @@ export function PlayerPicker({
   const getWinRate = (player: SavedPlayer) => {
     if (player.lifetimeGames === 0) return null;
     return Math.round((player.lifetimeWins / player.lifetimeGames) * 100);
-  };
-
-  const getSkillLabel = (skill: number) => {
-    switch (skill) {
-      case 1: return 'Beginner';
-      case 2: return 'Intermediate';
-      case 3: return 'Advanced';
-      default: return '';
-    }
   };
 
   const hasSearchQuery = newPlayerName.trim().length > 0;

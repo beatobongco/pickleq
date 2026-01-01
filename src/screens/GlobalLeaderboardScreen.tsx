@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
+import { getSkillLabel } from '../components/SkillSelector';
 import { getSavedPlayers, type SavedPlayer } from '../utils/storage';
 
 export function GlobalLeaderboardScreen() {
@@ -114,8 +115,9 @@ export function GlobalLeaderboardScreen() {
                           {player.name}
                         </span>
                         {player.skill && (
-                          <span className="text-yellow-500 text-sm">
-                            {'★'.repeat(player.skill)}
+                          <span className="text-sm text-gray-500">
+                            <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
+                            {' '}{getSkillLabel(player.skill)}
                           </span>
                         )}
                       </div>

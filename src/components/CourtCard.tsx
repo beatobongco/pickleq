@@ -1,5 +1,6 @@
 import type { Match, Player } from '../types';
 import { Button } from './Button';
+import { getSkillLabel } from './SkillSelector';
 
 interface CourtCardProps {
   court: number;
@@ -48,9 +49,10 @@ function TeamDisplay({
               </span>
             </div>
             {player.skill && (
-              <div className="text-yellow-500 text-sm">
-                {'★'.repeat(player.skill)}
+              <div className="text-sm">
+                <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
                 <span className="text-gray-300">{'★'.repeat(3 - player.skill)}</span>
+                <span className="text-gray-500 ml-1">{getSkillLabel(player.skill)}</span>
               </div>
             )}
           </button>

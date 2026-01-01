@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
+import { getSkillLabel } from '../components/SkillSelector';
 import { calculateLeaderboard, getWinPercentage } from '../utils/matching';
 import { announceLeaderboard } from '../utils/speech';
 
@@ -99,8 +100,16 @@ export function LeaderboardScreen() {
 
                     {/* Player Info */}
                     <div className="flex-1 min-w-0">
-                      <div className={`font-semibold truncate ${isTopThree ? 'text-lg' : 'text-base'} text-gray-900`}>
-                        {player.name}
+                      <div className="flex items-center gap-2">
+                        <span className={`font-semibold truncate ${isTopThree ? 'text-lg' : 'text-base'} text-gray-900`}>
+                          {player.name}
+                        </span>
+                        {player.skill && (
+                          <span className="text-sm text-gray-500">
+                            <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
+                            {' '}{getSkillLabel(player.skill)}
+                          </span>
+                        )}
                       </div>
                       <div className="text-sm text-gray-500">
                         {player.wins}-{player.losses} • {player.gamesPlayed} games
