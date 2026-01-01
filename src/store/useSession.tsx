@@ -448,26 +448,30 @@ interface SessionContextValue {
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
-export function SessionProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(sessionReducer, {
+function getInitialState(): SessionState {
+  const saved = loadSession();
+  if (saved) {
+    let screen: AppScreen = 'setup';
+    if (saved.endTime) {
+      screen = 'leaderboard';
+    } else if (saved.startTime) {
+      screen = 'play';
+    }
+    return {
+      session: saved,
+      screen,
+      undoAction: null,
+    };
+  }
+  return {
     session: createInitialSession(),
     screen: 'setup',
     undoAction: null,
-  });
+  };
+}
 
-  // Load session from localStorage on mount
-  useEffect(() => {
-    const saved = loadSession();
-    if (saved) {
-      dispatch({ type: 'LOAD_SESSION', session: saved });
-      // Determine correct screen based on session state
-      if (saved.endTime) {
-        dispatch({ type: 'SET_SCREEN', screen: 'leaderboard' });
-      } else if (saved.startTime) {
-        dispatch({ type: 'SET_SCREEN', screen: 'play' });
-      }
-    }
-  }, []);
+export function SessionProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(sessionReducer, null, getInitialState);
 
   // Save session to localStorage on changes
   useEffect(() => {
