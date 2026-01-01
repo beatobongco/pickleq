@@ -1,15 +1,30 @@
+import { useEffect, useRef } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
 import { calculateLeaderboard, getWinPercentage } from '../utils/matching';
+import { announceLeaderboard } from '../utils/speech';
 
 export function LeaderboardScreen() {
   const { session, newSession } = useSession();
+  const hasAnnounced = useRef(false);
 
   const leaderboard = calculateLeaderboard(session.players);
   const totalGames = session.matches.length;
   const sessionDuration = session.startTime && session.endTime
     ? Math.round((session.endTime - session.startTime) / 1000 / 60)
     : 0;
+
+  // Announce top 3 when leaderboard screen loads
+  useEffect(() => {
+    if (!hasAnnounced.current) {
+      hasAnnounced.current = true;
+      const topPlayers = leaderboard.slice(0, 3).map(player => ({
+        name: player.name,
+        winPct: getWinPercentage(player),
+      }));
+      announceLeaderboard(topPlayers);
+    }
+  }, [leaderboard]);
 
   const getMedal = (index: number) => {
     if (index === 0) return '🥇';
