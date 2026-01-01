@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
+import { QRCode } from '../components/QRCode';
 import { getSkillLabel } from '../components/SkillSelector';
 import { ShareModal } from '../components/ShareModal';
 import { calculateLeaderboard, getWinPercentage } from '../utils/matching';
@@ -68,22 +69,25 @@ export function LeaderboardScreen() {
           </div>
         </div>
 
-        {/* Shareable Session Link */}
+        {/* Shareable Session QR Code */}
         {venue && syncedSessionId && (
           <div className="bg-green-100 rounded-2xl p-4 shadow-sm mb-6">
             <div className="text-center">
-              <div className="text-sm font-semibold text-green-800 mb-2">
-                📱 Share this session with players!
+              <div className="text-sm font-semibold text-green-800 mb-3">
+                Scan to view your stats and share!
               </div>
-              <div className="bg-white rounded-lg px-3 py-2 text-sm font-mono text-gray-700 break-all">
-                {window.location.origin}/venue/{venue.slug}/session/{syncedSessionId}
+              <div className="flex justify-center mb-3">
+                <QRCode
+                  url={`${window.location.origin}/venue/${venue.slug}/session/${syncedSessionId}`}
+                  size={160}
+                />
               </div>
               <button
                 onClick={() => {
                   const url = `${window.location.origin}/venue/${venue.slug}/session/${syncedSessionId}`;
                   navigator.clipboard.writeText(url);
                 }}
-                className="mt-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
               >
                 Copy Link
               </button>

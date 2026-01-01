@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from '../store/useSession';
 import { useLanding } from '../App';
 import { Button } from '../components/Button';
+import { QRCode } from '../components/QRCode';
 import {
   getLocalVenue,
   checkSlugAvailable,
@@ -203,9 +204,13 @@ export function VenueSetupScreen() {
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="font-semibold text-gray-700 mb-3">QR Code (Coming Soon)</h3>
-              <div className="bg-gray-100 rounded-xl p-8 flex items-center justify-center">
-                <p className="text-gray-400">QR code will appear here</p>
+              <h3 className="font-semibold text-gray-700 mb-3">QR Code</h3>
+              <div className="flex justify-center">
+                <QRCode
+                  url={`https://pickleq.app/venue/${existingVenue.slug}`}
+                  size={180}
+                  label="Scan to view leaderboard"
+                />
               </div>
             </div>
 
