@@ -1,4 +1,5 @@
 import type { Session, SkillLevel } from '../types';
+import { saveVenueLocation, getLocalVenue, addToRoster } from './supabase';
 
 const STORAGE_KEY = 'dinksync_session';
 const LOCATIONS_KEY = 'dinksync_locations';
@@ -57,6 +58,11 @@ export function saveLocation(location: string, courts: number): void {
 
   locations.unshift({ name: location, courts });
   localStorage.setItem(LOCATIONS_KEY, JSON.stringify(locations.slice(0, 10)));
+
+  // Also sync to Supabase if venue is connected
+  if (getLocalVenue()) {
+    saveVenueLocation(location, courts).catch(console.error);
+  }
 }
 
 export function generateId(): string {
@@ -140,6 +146,11 @@ export function updatePlayerStats(
   }
 
   savePlayers(players);
+
+  // Also sync to cloud roster if venue is connected
+  if (getLocalVenue()) {
+    addToRoster(normalizedName, skill).catch(console.error);
+  }
 }
 
 export function getOrCreateSavedPlayer(name: string): SavedPlayer | null {

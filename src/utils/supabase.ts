@@ -131,7 +131,89 @@ export async function joinVenue(slug: string, password: string): Promise<{ succe
   };
 
   setLocalVenue(venue);
+
+  // Load locations from cloud and merge with localStorage
+  await syncLocationsToLocal(venue.id);
+
+  // Load roster from cloud and merge with localStorage players
+  await syncRosterToLocal(venue.id);
+
   return { success: true, venue };
+}
+
+// Sync cloud locations to localStorage
+async function syncLocationsToLocal(venueId: string): Promise<void> {
+  if (!supabase) return;
+
+  const { data, error } = await supabase
+    .from('locations')
+    .select('name, courts')
+    .eq('venue_id', venueId)
+    .order('created_at', { ascending: false });
+
+  if (error || !data || data.length === 0) return;
+
+  // Get existing local locations
+  const localKey = 'dinksync_locations';
+  const existingData = localStorage.getItem(localKey);
+  const existingLocations: Array<{ name: string; courts: number }> = existingData
+    ? JSON.parse(existingData)
+    : [];
+
+  // Merge: cloud locations take precedence, then add any local-only ones
+  const cloudNames = new Set(data.map((loc) => loc.name.toLowerCase()));
+  const localOnly = existingLocations.filter(
+    (loc) => !cloudNames.has(loc.name.toLowerCase())
+  );
+
+  const merged = [...data, ...localOnly].slice(0, 10);
+  localStorage.setItem(localKey, JSON.stringify(merged));
+}
+
+// Sync cloud roster to localStorage players
+async function syncRosterToLocal(venueId: string): Promise<void> {
+  if (!supabase) return;
+
+  const { data, error } = await supabase
+    .from('players')
+    .select('name, skill, lifetime_wins, lifetime_losses, lifetime_games, last_played_at')
+    .eq('venue_id', venueId)
+    .order('last_played_at', { ascending: false });
+
+  if (error || !data || data.length === 0) return;
+
+  // Get existing local players
+  const localKey = 'dinksync_players';
+  const existingData = localStorage.getItem(localKey);
+  const existingPlayers: Array<{
+    id: string;
+    name: string;
+    skill: number | null;
+    lifetimeWins: number;
+    lifetimeLosses: number;
+    lifetimeGames: number;
+    lastPlayed: number | null;
+  }> = existingData ? JSON.parse(existingData) : [];
+
+  // Convert cloud players to local format
+  const cloudPlayers = data.map((p) => ({
+    id: crypto.randomUUID(),
+    name: p.name,
+    skill: p.skill,
+    lifetimeWins: p.lifetime_wins,
+    lifetimeLosses: p.lifetime_losses,
+    lifetimeGames: p.lifetime_games,
+    lastPlayed: p.last_played_at ? new Date(p.last_played_at).getTime() : null,
+  }));
+
+  // Merge: cloud players take precedence (more accurate stats)
+  const cloudNames = new Set(cloudPlayers.map((p) => p.name.toLowerCase()));
+  const localOnly = existingPlayers.filter(
+    (p) => !cloudNames.has(p.name.toLowerCase())
+  );
+
+  const merged = [...cloudPlayers, ...localOnly];
+  localStorage.setItem(localKey, JSON.stringify(merged));
 }
 
 // Get venue by slug (for public leaderboard)
@@ -487,4 +569,125 @@ export async function getPlayerLifetimeStats(
     lifetimeGames: data.lifetime_games,
     lastPlayedAt: data.last_played_at,
   };
+}
+
+// ============================================
+// Location sync (for cross-device persistence)
+// ============================================
+
+export interface VenueLocation {
+  id: string;
+  venueId: string;
+  name: string;
+  courts: number;
+}
+
+// Get locations for a venue from Supabase
+export async function getVenueLocations(venueId: string): Promise<VenueLocation[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('locations')
+    .select('*')
+    .eq('venue_id', venueId)
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((loc) => ({
+    id: loc.id,
+    venueId: loc.venue_id,
+    name: loc.name,
+    courts: loc.courts,
+  }));
+}
+
+// Save a location to Supabase (upsert by name)
+export async function saveVenueLocation(name: string, courts: number): Promise<void> {
+  const venue = getLocalVenue();
+  if (!venue || !supabase) return;
+
+  // Check if location exists
+  const { data: existing } = await supabase
+    .from('locations')
+    .select('id')
+    .eq('venue_id', venue.id)
+    .eq('name', name)
+    .single();
+
+  if (existing) {
+    // Update existing
+    await supabase
+      .from('locations')
+      .update({ courts })
+      .eq('id', existing.id);
+  } else {
+    // Insert new
+    await supabase
+      .from('locations')
+      .insert({ venue_id: venue.id, name, courts });
+  }
+}
+
+// Sync local locations to Supabase and fetch any new ones
+export async function syncLocations(): Promise<VenueLocation[]> {
+  const venue = getLocalVenue();
+  if (!venue || !supabase) return [];
+
+  // Fetch cloud locations
+  return getVenueLocations(venue.id);
+}
+
+// ============================================
+// Roster sync (player list for venue)
+// ============================================
+
+// Get roster (all players who have played at this venue) for autocomplete
+export async function getVenueRoster(venueId: string): Promise<Array<{ name: string; skill: SkillLevel }>> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('players')
+    .select('name, skill')
+    .eq('venue_id', venueId)
+    .order('last_played_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((p) => ({
+    name: p.name,
+    skill: p.skill as SkillLevel,
+  }));
+}
+
+// Add a new player to the roster (for when they're first added to a session)
+export async function addToRoster(name: string, skill: SkillLevel): Promise<void> {
+  const venue = getLocalVenue();
+  if (!venue || !supabase) return;
+
+  // Check if player already exists
+  const { data: existing } = await supabase
+    .from('players')
+    .select('id')
+    .eq('venue_id', venue.id)
+    .eq('name', name)
+    .single();
+
+  if (!existing) {
+    // Insert new player with 0 stats
+    await supabase.from('players').insert({
+      venue_id: venue.id,
+      name,
+      skill,
+      lifetime_wins: 0,
+      lifetime_losses: 0,
+      lifetime_games: 0,
+    });
+  } else if (skill !== null) {
+    // Update skill if provided
+    await supabase
+      .from('players')
+      .update({ skill })
+      .eq('id', existing.id);
+  }
 }
