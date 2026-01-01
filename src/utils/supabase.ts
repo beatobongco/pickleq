@@ -13,6 +13,20 @@ export const supabase = supabaseUrl && supabaseKey
 const VENUE_KEY = 'pickleq_venue';
 const SYNC_QUEUE_KEY = 'pickleq_sync_queue';
 
+// Simple password hashing using Web Crypto API
+export async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  const passwordHash = await hashPassword(password);
+  return passwordHash === hash;
+}
+
 // Venue management
 export function getLocalVenue(): Venue | null {
   const stored = localStorage.getItem(VENUE_KEY);
@@ -46,7 +60,9 @@ export async function checkSlugAvailable(slug: string): Promise<boolean> {
 }
 
 // Create or get venue
-export async function createVenue(slug: string, name: string): Promise<Venue | null> {
+export async function createVenue(slug: string, name: string, password: string): Promise<Venue | null> {
+  const passwordHash = await hashPassword(password);
+
   if (!supabase) {
     // Offline mode - create local-only venue
     const venue: Venue = {
@@ -54,6 +70,7 @@ export async function createVenue(slug: string, name: string): Promise<Venue | n
       slug,
       name,
       createdAt: new Date().toISOString(),
+      passwordHash,
     };
     setLocalVenue(venue);
     return venue;
@@ -61,7 +78,7 @@ export async function createVenue(slug: string, name: string): Promise<Venue | n
 
   const { data, error } = await supabase
     .from('venues')
-    .insert({ slug, name })
+    .insert({ slug, name, password_hash: passwordHash })
     .select()
     .single();
 
@@ -75,10 +92,46 @@ export async function createVenue(slug: string, name: string): Promise<Venue | n
     slug: data.slug,
     name: data.name,
     createdAt: data.created_at,
+    passwordHash,
   };
 
   setLocalVenue(venue);
   return venue;
+}
+
+// Join existing venue with password
+export async function joinVenue(slug: string, password: string): Promise<{ success: boolean; error?: string; venue?: Venue }> {
+  if (!supabase) {
+    return { success: false, error: 'Offline mode - cannot join existing venue' };
+  }
+
+  // Get venue by slug
+  const { data, error } = await supabase
+    .from('venues')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error || !data) {
+    return { success: false, error: 'Venue not found' };
+  }
+
+  // Verify password
+  const passwordHash = await hashPassword(password);
+  if (data.password_hash !== passwordHash) {
+    return { success: false, error: 'Incorrect password' };
+  }
+
+  const venue: Venue = {
+    id: data.id,
+    slug: data.slug,
+    name: data.name,
+    createdAt: data.created_at,
+    passwordHash,
+  };
+
+  setLocalVenue(venue);
+  return { success: true, venue };
 }
 
 // Get venue by slug (for public leaderboard)

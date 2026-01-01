@@ -48,6 +48,7 @@ export interface Venue {
   slug: string;
   name: string;
   createdAt: string;
+  passwordHash?: string;
 }
 
 export interface VenuePlayer {
