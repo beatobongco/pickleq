@@ -2,6 +2,23 @@
 const speechQueue: string[] = [];
 let isSpeaking = false;
 
+// Mute setting
+const MUTE_KEY = 'pickleq_mute';
+
+export function isMuted(): boolean {
+  return localStorage.getItem(MUTE_KEY) === 'true';
+}
+
+export function setMuted(muted: boolean): void {
+  localStorage.setItem(MUTE_KEY, muted ? 'true' : 'false');
+  // Cancel any ongoing speech when muting
+  if (muted && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    speechQueue.length = 0;
+    isSpeaking = false;
+  }
+}
+
 function processQueue(): void {
   if (isSpeaking || speechQueue.length === 0) return;
 
@@ -38,6 +55,8 @@ function processQueue(): void {
 }
 
 export function announce(text: string): void {
+  if (isMuted()) return;
+
   if (!('speechSynthesis' in window)) {
     console.warn('Text-to-speech not supported in this browser');
     return;

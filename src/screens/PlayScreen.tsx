@@ -7,7 +7,7 @@ import { PlayerPicker } from '../components/PlayerPicker';
 import { getSkillLabel } from '../components/SkillSelector';
 import { UndoToast } from '../components/UndoToast';
 import { getPlayersWhoHaventPlayedRecently } from '../utils/matching';
-import { announceNextMatch, announceWinner } from '../utils/speech';
+import { announceNextMatch, announceWinner, isMuted, setMuted } from '../utils/speech';
 
 export function PlayScreen() {
   const {
@@ -26,7 +26,14 @@ export function PlayScreen() {
   } = useSession();
 
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [muted, setMutedState] = useState(isMuted);
   const sessionPlayerNames = session.players.map(p => p.name);
+
+  const toggleMute = () => {
+    const newMuted = !muted;
+    setMutedState(newMuted);
+    setMuted(newMuted);
+  };
 
   // Track announced matches to avoid re-announcing
   const announcedMatches = useRef<Set<string>>(new Set());
@@ -103,13 +110,35 @@ export function PlayScreen() {
               {session.matches.length} games completed • {queue.length} in queue
             </p>
           </div>
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => setShowEndConfirm(true)}
-          >
-            End Session
-          </Button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleMute}
+              className={`p-2 rounded-lg transition-colors ${
+                muted
+                  ? 'bg-gray-200 text-gray-500'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+              title={muted ? 'Unmute announcements' : 'Mute announcements'}
+            >
+              {muted ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+              )}
+            </button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => setShowEndConfirm(true)}
+            >
+              End Session
+            </Button>
+          </div>
         </div>
       </header>
 
