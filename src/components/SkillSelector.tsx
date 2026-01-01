@@ -16,10 +16,13 @@ export function getSkillLabel(skill: SkillLevel): string {
 }
 
 export function SkillSelector({ skill, onChange, size = 'md' }: SkillSelectorProps) {
-  const handleClick = () => {
-    // Cycle through: null -> 1 -> 2 -> 3 -> null
-    const next: SkillLevel = skill === null ? 1 : skill === 3 ? null : ((skill + 1) as SkillLevel);
-    onChange(next);
+  const handleStarClick = (level: 1 | 2 | 3) => {
+    // If clicking the same level that's currently set, clear it
+    if (skill === level) {
+      onChange(null);
+    } else {
+      onChange(level);
+    }
   };
 
   const starSize = size === 'sm' ? 'text-base' : 'text-lg';
@@ -27,25 +30,28 @@ export function SkillSelector({ skill, onChange, size = 'md' }: SkillSelectorPro
   const label = getSkillLabel(skill);
 
   return (
-    <button
-      onClick={handleClick}
-      className={`flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation`}
+    <div
+      className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
       title={skill === null ? 'Set skill level' : `Skill: ${label}`}
-      aria-label={skill === null ? 'Set skill level' : `Skill level: ${label}, click to change`}
     >
       <span className={`flex gap-0.5 ${starSize}`}>
-        {[1, 2, 3].map((level) => (
-          <span
+        {([1, 2, 3] as const).map((level) => (
+          <button
             key={level}
-            className={level <= (skill ?? 0) ? 'text-yellow-500' : 'text-gray-300'}
+            type="button"
+            onClick={() => handleStarClick(level)}
+            className="touch-manipulation hover:scale-110 transition-transform"
+            aria-label={`Set skill to ${getSkillLabel(level)}`}
           >
-            ★
-          </span>
+            <span className={level <= (skill ?? 0) ? 'text-yellow-500' : 'text-gray-300'}>
+              ★
+            </span>
+          </button>
         ))}
       </span>
       <span className={`${textSize} ${skill === null ? 'text-gray-400' : 'text-gray-600'}`}>
         {label}
       </span>
-    </button>
+    </div>
   );
 }
