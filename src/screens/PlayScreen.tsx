@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
 import { CourtCard } from '../components/CourtCard';
 import { PlayerCard } from '../components/PlayerCard';
 import { UndoToast } from '../components/UndoToast';
 import { getPlayersWhoHaventPlayedRecently } from '../utils/matching';
+import { announceNextMatch, announceWinner } from '../utils/speech';
 
 export function PlayScreen() {
   const {
@@ -22,6 +23,31 @@ export function PlayScreen() {
 
   const [showEndConfirm, setShowEndConfirm] = useState(false);
 
+  // Track announced matches to avoid re-announcing
+  const announcedMatches = useRef<Set<string>>(new Set());
+
+  // Announce new matches when they appear
+  useEffect(() => {
+    for (const match of session.activeMatches) {
+      if (!announcedMatches.current.has(match.id)) {
+        announcedMatches.current.add(match.id);
+
+        // Get player names for announcement
+        const team1Names = match.team1
+          .map(id => session.players.find(p => p.id === id)?.name)
+          .filter(Boolean) as string[];
+        const team2Names = match.team2
+          .map(id => session.players.find(p => p.id === id)?.name)
+          .filter(Boolean) as string[];
+
+        // Small delay to let UI update first
+        setTimeout(() => {
+          announceNextMatch(match.court, team1Names, team2Names);
+        }, 3000);
+      }
+    }
+  }, [session.activeMatches, session.players]);
+
   const playersNeedingAttention = getPlayersWhoHaventPlayedRecently(
     session.players,
     session.activeMatches
@@ -34,6 +60,18 @@ export function PlayScreen() {
   const courts = Array.from({ length: session.courts }, (_, i) => i + 1);
 
   const handleRecordWinner = (matchId: string, winner: 1 | 2) => {
+    // Find the match and get winner names before recording (which removes the match)
+    const match = session.activeMatches.find(m => m.id === matchId);
+    if (match) {
+      const winningTeam = winner === 1 ? match.team1 : match.team2;
+      const winnerNames = winningTeam
+        .map(id => session.players.find(p => p.id === id)?.name)
+        .filter(Boolean) as string[];
+
+      // Announce winner
+      announceWinner(match.court, winnerNames);
+    }
+
     recordWinner(matchId, winner);
   };
 
