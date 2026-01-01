@@ -49,7 +49,7 @@ export function SkillSelector({ skill, onChange, size = 'md' }: SkillSelectorPro
           </button>
         ))}
       </span>
-      <span className={`${textSize} ${skill === null ? 'text-gray-400' : 'text-gray-600'}`}>
+      <span className={`${textSize} w-20 ${skill === null ? 'text-gray-400' : 'text-gray-600'}`}>
         {label}
       </span>
     </div>
