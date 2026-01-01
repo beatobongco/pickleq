@@ -126,47 +126,55 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
       };
 
     case 'ADD_PLAYER': {
+      // If session is active, add player directly to queue (checked-in)
+      const isActiveSession = state.session.startTime !== null && state.session.endTime === null;
       const newPlayer: Player = {
         id: generateId(),
         name: action.name.trim(),
         skill: null,
-        status: 'not-here',
+        status: isActiveSession ? 'checked-in' : 'not-here',
         gamesPlayed: 0,
         wins: 0,
         losses: 0,
         lastPartner: null,
         courtsPlayed: [],
-        checkedInAt: null,
+        checkedInAt: isActiveSession ? Date.now() : null,
       };
-      return {
+      const newState = {
         ...state,
         session: {
           ...state.session,
           players: [...state.session.players, newPlayer],
         },
       };
+      // Try to fill courts if session is active
+      return isActiveSession ? fillAvailableCourts(newState) : newState;
     }
 
     case 'ADD_PLAYER_WITH_SKILL': {
+      // If session is active, add player directly to queue (checked-in)
+      const isActiveSession = state.session.startTime !== null && state.session.endTime === null;
       const newPlayer: Player = {
         id: generateId(),
         name: action.name.trim(),
         skill: action.skill,
-        status: 'not-here',
+        status: isActiveSession ? 'checked-in' : 'not-here',
         gamesPlayed: 0,
         wins: 0,
         losses: 0,
         lastPartner: null,
         courtsPlayed: [],
-        checkedInAt: null,
+        checkedInAt: isActiveSession ? Date.now() : null,
       };
-      return {
+      const newState = {
         ...state,
         session: {
           ...state.session,
           players: [...state.session.players, newPlayer],
         },
       };
+      // Try to fill courts if session is active
+      return isActiveSession ? fillAvailableCourts(newState) : newState;
     }
 
     case 'REMOVE_PLAYER':
