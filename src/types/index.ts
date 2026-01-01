@@ -35,7 +35,7 @@ export interface Session {
   endTime: number | null;
 }
 
-export type AppScreen = 'setup' | 'play' | 'leaderboard';
+export type AppScreen = 'setup' | 'play' | 'leaderboard' | 'global-leaderboard';
 
 export interface UndoAction {
   type: 'winner' | 'checkin' | 'checkout' | 'remove';

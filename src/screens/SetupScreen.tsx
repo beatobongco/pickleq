@@ -17,6 +17,7 @@ export function SetupScreen() {
     setPlayerSkill,
     checkInPlayer,
     startSession,
+    setScreen,
   } = useSession();
 
   const [newPlayerName, setNewPlayerName] = useState('');
@@ -73,8 +74,19 @@ export function SetupScreen() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 py-4">
-        <h1 className="text-2xl font-bold text-gray-900">DinkSync</h1>
-        <p className="text-gray-600 text-sm">Pickleball Open Play Manager</p>
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">DinkSync</h1>
+            <p className="text-gray-600 text-sm">Pickleball Open Play Manager</p>
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setScreen('global-leaderboard')}
+          >
+            Leaderboard
+          </Button>
+        </div>
       </header>
 
       <main className="max-w-2xl mx-auto p-4 space-y-6">
