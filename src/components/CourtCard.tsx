@@ -1,6 +1,7 @@
 import type { Match, Player } from '../types';
 import { Button } from './Button';
 import { getSkillLabel } from './SkillSelector';
+import { announceNextMatch } from '../utils/speech';
 
 interface CourtCardProps {
   court: number;
@@ -80,10 +81,27 @@ export function CourtCard({
     );
   }
 
+  const handleAnnounce = () => {
+    const team1Names = match.team1
+      .map(id => players.find(p => p.id === id)?.name)
+      .filter(Boolean) as string[];
+    const team2Names = match.team2
+      .map(id => players.find(p => p.id === id)?.name)
+      .filter(Boolean) as string[];
+    announceNextMatch(court, team1Names, team2Names);
+  };
+
   return (
     <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
-      <div className="text-center mb-4">
+      <div className="flex items-center justify-center gap-2 mb-4">
         <div className="text-2xl font-bold text-gray-800">Court {court}</div>
+        <button
+          onClick={handleAnnounce}
+          className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          title="Announce match"
+        >
+          🔊
+        </button>
       </div>
 
       <div className="flex gap-3 mb-4">
