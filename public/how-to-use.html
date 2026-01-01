@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Use PickleQ - Simple Guide</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      padding: 40px 20px;
+      background: white;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      font-size: 2.5rem;
+      color: #16a34a;
+      margin-bottom: 10px;
+    }
+    header p {
+      font-size: 1.2rem;
+      color: #666;
+    }
+    .step {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: #16a34a;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+    .step h2 {
+      display: inline;
+      font-size: 1.4rem;
+      color: #333;
+      vertical-align: middle;
+    }
+    .step-content {
+      margin-top: 16px;
+      padding-left: 52px;
+    }
+    .step-content p {
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+    .tip {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-top: 12px;
+    }
+    .tip strong {
+      color: #92400e;
+    }
+    .action-box {
+      background: #f0fdf4;
+      border: 2px solid #16a34a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+    .action-box strong {
+      color: #16a34a;
+    }
+    .emoji {
+      font-size: 1.5rem;
+      margin-right: 8px;
+    }
+    section {
+      margin-bottom: 40px;
+    }
+    section > h2 {
+      font-size: 1.8rem;
+      color: #16a34a;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #dcfce7;
+    }
+    .faq {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .faq h3 {
+      color: #16a34a;
+      margin-bottom: 8px;
+    }
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+    footer a {
+      color: #16a34a;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .button {
+      display: inline-block;
+      background: #16a34a;
+      color: white;
+      padding: 16px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 20px;
+    }
+    .button:hover {
+      background: #15803d;
+    }
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 2rem;
+      }
+      .step-content {
+        padding-left: 0;
+        margin-top: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="font-size: 4rem; margin-bottom: 10px;">🏓</div>
+      <h1>How to Use PickleQ</h1>
+      <p>A simple guide for running open play sessions</p>
+    </header>
+
+    <!-- WHAT IS IT -->
+    <section>
+      <h2>What is PickleQ?</h2>
+      <div class="step">
+        <p style="font-size: 1.2rem;">
+          <span class="emoji">✨</span>
+          PickleQ helps you run <strong>fair pickleball open play</strong> at your court.
+        </p>
+        <ul style="margin-top: 16px; margin-left: 20px; font-size: 1.1rem;">
+          <li style="margin-bottom: 8px;">Players check in when they arrive</li>
+          <li style="margin-bottom: 8px;">The app picks who plays next (fairly!)</li>
+          <li style="margin-bottom: 8px;">You tap who won each game</li>
+          <li style="margin-bottom: 8px;">Everyone sees their stats at the end</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- BEFORE YOU START -->
+    <section>
+      <h2>Before You Start</h2>
+      <div class="step">
+        <span class="step-number">1</span>
+        <h2>Open the App</h2>
+        <div class="step-content">
+          <p>Go to <strong>pickleq.app</strong> on your tablet or phone.</p>
+          <p>Works best on a tablet at the front desk!</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <h2>Set Up Your Venue (One Time Only)</h2>
+        <div class="step-content">
+          <p>Tap the <strong>gear icon</strong> in the top corner.</p>
+          <p>Enter your venue name (like "Manila Pickleball Club").</p>
+          <p>This lets players see their stats online later!</p>
+          <div class="tip">
+            <strong>Tip:</strong> You only need to do this once. The app remembers it.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RUNNING A SESSION -->
+    <section>
+      <h2>Running a Session</h2>
+
+      <div class="step">
+        <span class="step-number">1</span>
+        <h2>Set Up the Session</h2>
+        <div class="step-content">
+          <p>Pick where you're playing (like "Courts A-D").</p>
+          <p>Set how many courts you have.</p>
+          <div class="action-box">
+            <strong>You need at least 4 players to start!</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <h2>Add Players</h2>
+        <div class="step-content">
+          <p>Type each player's name and tap <strong>Add</strong>.</p>
+          <p>You can also pick their skill level (stars):</p>
+          <ul style="margin-left: 20px; margin-top: 8px;">
+            <li><span style="color: #eab308;">★</span> = Beginner</li>
+            <li><span style="color: #eab308;">★★</span> = Intermediate</li>
+            <li><span style="color: #eab308;">★★★</span> = Advanced</li>
+          </ul>
+          <div class="tip">
+            <strong>Tip:</strong> Skill levels help make fair teams!
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">3</span>
+        <h2>Check Players In</h2>
+        <div class="step-content">
+          <p>Tap a player's name to <strong>check them in</strong>.</p>
+          <p>Only checked-in players will be put on courts.</p>
+          <p>Players can check out if they need a break!</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">4</span>
+        <h2>Start Playing!</h2>
+        <div class="step-content">
+          <p>Tap the big green <strong>Start Session</strong> button.</p>
+          <p>The app will automatically put 4 players on each court.</p>
+          <div class="action-box">
+            <strong>The app picks players who played the least games first.</strong> This keeps it fair!
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">5</span>
+        <h2>Record Winners</h2>
+        <div class="step-content">
+          <p>When a game ends, find that court on screen.</p>
+          <p>Tap the <strong>winning team</strong> (Blue or Orange side).</p>
+          <p>Those 4 players go back in line, and 4 new players get on court!</p>
+          <div class="tip">
+            <strong>Made a mistake?</strong> A popup appears for 10 seconds to undo.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">6</span>
+        <h2>End the Session</h2>
+        <div class="step-content">
+          <p>When you're done, tap <strong>End Session</strong>.</p>
+          <p>You'll see the final leaderboard with everyone's stats!</p>
+          <p>The top 3 players get medals: 🥇 🥈 🥉</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHARING STATS -->
+    <section>
+      <h2>Sharing Stats with Players</h2>
+
+      <div class="step">
+        <p style="font-size: 1.2rem; margin-bottom: 16px;">
+          <span class="emoji">📱</span>
+          After the session ends, you get a <strong>share link</strong>!
+        </p>
+        <p>Players can visit this link on their own phones to:</p>
+        <ul style="margin-left: 20px; margin-top: 12px; font-size: 1.1rem;">
+          <li style="margin-bottom: 8px;">See their session stats</li>
+          <li style="margin-bottom: 8px;">Download a stats card to post on social media</li>
+          <li style="margin-bottom: 8px;">Check the all-time leaderboard</li>
+        </ul>
+        <div class="action-box">
+          <strong>Post this link at your court!</strong> Players love sharing their wins.
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section>
+      <h2>Common Questions</h2>
+
+      <div class="faq">
+        <h3>What if a player arrives late?</h3>
+        <p>Just add them and check them in! They'll join the next available game.</p>
+      </div>
+
+      <div class="faq">
+        <h3>What if a player needs to leave early?</h3>
+        <p>Tap their name and check them out. They won't be assigned to new games.</p>
+      </div>
+
+      <div class="faq">
+        <h3>What if someone leaves mid-game?</h3>
+        <p>The app will find a substitute from the waiting line!</p>
+      </div>
+
+      <div class="faq">
+        <h3>Do I need internet?</h3>
+        <p>The app works offline! Stats sync to the cloud when you have internet.</p>
+      </div>
+
+      <div class="faq">
+        <h3>What if I close the app by accident?</h3>
+        <p>Don't worry! The app saves everything. Just open it again.</p>
+      </div>
+
+      <div class="faq">
+        <h3>How does the app pick teams?</h3>
+        <p>It tries to balance skill levels. A strong player pairs with a newer player, so games are fair and fun!</p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section style="text-align: center; padding: 40px 0;">
+      <h2 style="border: none; margin-bottom: 16px;">Ready to Start?</h2>
+      <p style="font-size: 1.2rem; margin-bottom: 20px;">Open the app and run your first session!</p>
+      <a href="/" class="button">Open PickleQ</a>
+    </section>
+
+    <footer>
+      <p>Questions? Email us at <a href="mailto:hello@pickleq.app">hello@pickleq.app</a></p>
+      <p style="margin-top: 12px;">Made with 💚 for the pickleball community</p>
+    </footer>
+  </div>
+</body>
+</html>

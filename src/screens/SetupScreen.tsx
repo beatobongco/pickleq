@@ -41,7 +41,16 @@ export function SetupScreen() {
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">🏓 PickleQ</h1>
-            <p className="text-gray-600 text-sm">Pickleball Open Play Manager</p>
+            <p className="text-gray-600 text-sm">
+              Pickleball Open Play Manager
+              <span className="mx-1">•</span>
+              <a
+                href="how-to-use.html"
+                className="text-green-600 hover:text-green-700 hover:underline"
+              >
+                Help
+              </a>
+            </p>
           </div>
           <div className="flex gap-2">
             <Button
