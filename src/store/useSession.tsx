@@ -191,7 +191,7 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
       };
 
     case 'START_SESSION': {
-      saveLocation(state.session.location);
+      saveLocation(state.session.location, state.session.courts);
       const startedState = {
         ...state,
         session: {

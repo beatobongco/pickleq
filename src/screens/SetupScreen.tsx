@@ -19,7 +19,6 @@ export function SetupScreen() {
   } = useSession();
 
   const [newPlayerName, setNewPlayerName] = useState('');
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
 
   const savedLocations = useMemo(() => getSavedLocations(), []);
 
@@ -31,9 +30,9 @@ export function SetupScreen() {
     }
   };
 
-  const handleSelectLocation = (loc: string) => {
-    setLocation(loc);
-    setShowLocationDropdown(false);
+  const handleSelectLocation = (loc: { name: string; courts: number }) => {
+    setLocation(loc.name);
+    setCourts(loc.courts);
   };
 
   const notHerePlayers = session.players.filter(p => p.status === 'not-here');
@@ -53,35 +52,34 @@ export function SetupScreen() {
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Location
           </label>
-          <div className="relative">
-            <input
-              type="text"
-              value={session.location}
-              onChange={(e) => setLocation(e.target.value)}
-              onFocus={() => savedLocations.length > 0 && setShowLocationDropdown(true)}
-              placeholder="Enter location name..."
-              className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
-            />
-            {showLocationDropdown && savedLocations.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden">
-                {savedLocations.map((loc) => (
-                  <button
-                    key={loc}
-                    onClick={() => handleSelectLocation(loc)}
-                    className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
-                  >
-                    {loc}
-                  </button>
-                ))}
+
+          {/* Saved locations as quick-select buttons */}
+          {savedLocations.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {savedLocations.map((loc) => (
                 <button
-                  onClick={() => setShowLocationDropdown(false)}
-                  className="w-full px-4 py-2 text-sm text-gray-500 hover:bg-gray-50"
+                  key={loc.name}
+                  onClick={() => handleSelectLocation(loc)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    session.location === loc.name
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
                 >
-                  Close
+                  {loc.name}
+                  <span className="ml-1 opacity-70">({loc.courts})</span>
                 </button>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
+
+          <input
+            type="text"
+            value={session.location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder={savedLocations.length > 0 ? "Or enter new location..." : "Enter location name..."}
+            className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
+          />
         </section>
 
         {/* Courts */}
