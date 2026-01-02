@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useSession } from '../store/useSession';
 import { getSavedLocations } from '../utils/storage';
 import { getLocalVenue } from '../utils/supabase';
 import { Button } from '../components/Button';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerPicker } from '../components/PlayerPicker';
+import { SkillSelector } from '../components/SkillSelector';
 
 export function SetupScreen() {
   const {
@@ -21,7 +22,11 @@ export function SetupScreen() {
     checkInPlayer,
     startSession,
     setScreen,
+    lockPartners,
+    unlockPartner,
   } = useSession();
+
+  const [selectedForPairing, setSelectedForPairing] = useState<string | null>(null);
 
   const savedLocations = useMemo(() => getSavedLocations(), []);
   const venue = useMemo(() => getLocalVenue(), []);
@@ -200,17 +205,100 @@ export function SetupScreen() {
               <h2 className="text-sm font-semibold text-gray-700">
                 Checked In ({checkedInPlayers.length})
               </h2>
+              {selectedForPairing && (
+                <button
+                  onClick={() => setSelectedForPairing(null)}
+                  className="text-xs text-gray-500 hover:text-gray-700"
+                >
+                  Cancel pairing
+                </button>
+              )}
             </div>
+            {selectedForPairing && (
+              <div className="mb-3 px-3 py-2 bg-purple-50 text-purple-700 text-sm rounded-lg text-center">
+                Tap another player to pair as teammates
+              </div>
+            )}
             <div className="space-y-2">
-              {checkedInPlayers.map((player) => (
-                <PlayerCard
-                  key={player.id}
-                  player={player}
-                  showSkill={true}
-                  showActions={false}
-                  onSkillChange={(skill) => setPlayerSkill(player.id, skill)}
-                />
-              ))}
+              {checkedInPlayers.map((player) => {
+                const isSelected = selectedForPairing === player.id;
+                const isLocked = !!player.lockedPartnerId;
+                const lockedPartner = isLocked
+                  ? checkedInPlayers.find(p => p.id === player.lockedPartnerId)
+                  : null;
+                const canPairWith = selectedForPairing &&
+                  selectedForPairing !== player.id &&
+                  !player.lockedPartnerId &&
+                  session.gameMode === 'doubles';
+
+                return (
+                  <div
+                    key={player.id}
+                    onClick={() => {
+                      if (canPairWith) {
+                        lockPartners(selectedForPairing, player.id);
+                        setSelectedForPairing(null);
+                      }
+                    }}
+                    className={`
+                      border-2 rounded-xl p-3 transition-all duration-200
+                      ${isSelected
+                        ? 'bg-purple-100 border-purple-400'
+                        : canPairWith
+                          ? 'bg-purple-50 border-purple-300 cursor-pointer hover:bg-purple-100'
+                          : 'bg-yellow-50 border-yellow-400'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="font-semibold text-lg truncate text-gray-900">
+                          {player.name}
+                        </span>
+                        {isLocked && lockedPartner && (
+                          <span className="text-xs bg-purple-600 text-white px-1.5 py-0.5 rounded">
+                            🔗 {lockedPartner.name}
+                          </span>
+                        )}
+                        <SkillSelector
+                          skill={player.skill}
+                          onChange={(skill) => setPlayerSkill(player.id, skill)}
+                          size="sm"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {session.gameMode === 'doubles' && !isLocked && !selectedForPairing && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedForPairing(player.id);
+                            }}
+                            className="text-gray-400 hover:text-purple-600 p-1.5 transition-colors"
+                            title="Pair with another player"
+                          >
+                            🔗
+                          </button>
+                        )}
+                        {isLocked && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              unlockPartner(player.id);
+                            }}
+                            className="text-purple-500 hover:text-purple-700 p-1.5 transition-colors"
+                            title="Unpair"
+                          >
+                            ✂️
+                          </button>
+                        )}
+                        <span className="bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded-lg">
+                          In Queue
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}

@@ -33,7 +33,9 @@ type SessionAction =
   | { type: 'NEW_SESSION' }
   | { type: 'FILL_COURTS' }
   | { type: 'FILL_COURT'; court: number }
-  | { type: 'SET_SYNCED_SESSION_ID'; sessionId: string | null };
+  | { type: 'SET_SYNCED_SESSION_ID'; sessionId: string | null }
+  | { type: 'LOCK_PARTNERS'; player1Id: string; player2Id: string }
+  | { type: 'UNLOCK_PARTNER'; playerId: string };
 
 function createInitialSession(): Session {
   const savedLocations = getSavedLocations();
@@ -202,6 +204,7 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
         wins: 0,
         losses: 0,
         lastPartner: null,
+        lockedPartnerId: null,
         courtsPlayed: [],
         checkedInAt: isActiveSession ? Date.now() : null,
       };
@@ -228,6 +231,7 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
         wins: 0,
         losses: 0,
         lastPartner: null,
+        lockedPartnerId: null,
         courtsPlayed: [],
         checkedInAt: isActiveSession ? Date.now() : null,
       };
@@ -534,6 +538,43 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
     case 'FILL_COURT':
       return fillSingleCourt(state, action.court);
 
+    case 'LOCK_PARTNERS': {
+      // Lock two players together as partners
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          players: state.session.players.map(p => {
+            if (p.id === action.player1Id) {
+              return { ...p, lockedPartnerId: action.player2Id };
+            }
+            if (p.id === action.player2Id) {
+              return { ...p, lockedPartnerId: action.player1Id };
+            }
+            return p;
+          }),
+        },
+      };
+    }
+
+    case 'UNLOCK_PARTNER': {
+      // Unlock a player and their partner
+      const player = state.session.players.find(p => p.id === action.playerId);
+      const partnerId = player?.lockedPartnerId;
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          players: state.session.players.map(p => {
+            if (p.id === action.playerId || p.id === partnerId) {
+              return { ...p, lockedPartnerId: null };
+            }
+            return p;
+          }),
+        },
+      };
+    }
+
     case 'SET_SYNCED_SESSION_ID':
       return { ...state, syncedSessionId: action.sessionId };
 
@@ -570,6 +611,8 @@ interface SessionContextValue {
   newSession: () => void;
   fillCourts: () => void;
   fillCourt: (court: number) => void;
+  lockPartners: (player1Id: string, player2Id: string) => void;
+  unlockPartner: (playerId: string) => void;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -704,6 +747,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'FILL_COURTS' }), []),
     fillCourt: useCallback((court: number) =>
       dispatch({ type: 'FILL_COURT', court }), []),
+    lockPartners: useCallback((player1Id: string, player2Id: string) =>
+      dispatch({ type: 'LOCK_PARTNERS', player1Id, player2Id }), []),
+    unlockPartner: useCallback((playerId: string) =>
+      dispatch({ type: 'UNLOCK_PARTNER', playerId }), []),
   };
 
   return (

@@ -22,10 +22,13 @@ export function PlayScreen() {
     addPlayer,
     addPlayerWithSkill,
     fillCourt,
+    lockPartners,
+    unlockPartner,
   } = useSession();
 
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [muted, setMutedState] = useState(isMuted);
+  const [selectedForPairing, setSelectedForPairing] = useState<string | null>(null);
   const sessionPlayerNames = session.players.map(p => p.name);
 
   const toggleMute = () => {
@@ -205,18 +208,28 @@ export function PlayScreen() {
               <span className="text-white font-bold">NEXT UP</span>
               <span className="text-gray-400 text-sm">({queue.length})</span>
             </div>
-            {(() => {
-              const playersNeeded = session.gameMode === 'doubles' ? 4 : 2;
-              const playersShort = playersNeeded - queue.length;
-              if (playersShort > 0 && queue.length > 0) {
-                return (
-                  <span className="text-yellow-400 text-xs">
-                    Need {playersShort} more
-                  </span>
-                );
-              }
-              return null;
-            })()}
+            <div className="flex items-center gap-2">
+              {selectedForPairing && (
+                <button
+                  onClick={() => setSelectedForPairing(null)}
+                  className="text-xs text-gray-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+              )}
+              {(() => {
+                const playersNeeded = session.gameMode === 'doubles' ? 4 : 2;
+                const playersShort = playersNeeded - queue.length;
+                if (playersShort > 0 && queue.length > 0) {
+                  return (
+                    <span className="text-yellow-400 text-xs">
+                      Need {playersShort} more
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+            </div>
           </div>
           {queue.length === 0 ? (
             <p className="text-gray-500 text-center py-6">
@@ -228,16 +241,45 @@ export function PlayScreen() {
                 const winRate = player.gamesPlayed > 0
                   ? Math.round((player.wins / player.gamesPlayed) * 100)
                   : null;
+                const isSelected = selectedForPairing === player.id;
+                const isLocked = !!player.lockedPartnerId;
+                const lockedPartner = isLocked
+                  ? queue.find(p => p.id === player.lockedPartnerId)
+                  : null;
+                const canPairWith = selectedForPairing &&
+                  selectedForPairing !== player.id &&
+                  !player.lockedPartnerId &&
+                  session.gameMode === 'doubles';
+
                 return (
                   <div
                     key={player.id}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors"
+                    className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                      isSelected
+                        ? 'bg-purple-900/50'
+                        : canPairWith
+                          ? 'bg-purple-900/20 hover:bg-purple-900/40 cursor-pointer'
+                          : 'hover:bg-gray-800'
+                    }`}
+                    onClick={() => {
+                      if (canPairWith) {
+                        lockPartners(selectedForPairing, player.id);
+                        setSelectedForPairing(null);
+                      }
+                    }}
                   >
                     <span className="text-2xl font-bold text-gray-600 w-8 text-center flex-shrink-0">
                       {index + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <span className="font-semibold text-white truncate block">{player.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-white truncate">{player.name}</span>
+                        {isLocked && lockedPartner && (
+                          <span className="text-xs bg-purple-600 text-white px-1.5 py-0.5 rounded">
+                            🔗 {lockedPartner.name}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 text-xs text-gray-400">
                         {player.skill && (
                           <span>
@@ -253,16 +295,50 @@ export function PlayScreen() {
                         )}
                       </div>
                     </div>
-                    <button
-                      onClick={() => checkOutPlayer(player.id)}
-                      className="text-gray-500 hover:text-red-400 p-2 transition-colors"
-                      title="Remove from queue"
-                    >
-                      ✕
-                    </button>
+                    <div className="flex items-center gap-1">
+                      {session.gameMode === 'doubles' && !isLocked && !selectedForPairing && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedForPairing(player.id);
+                          }}
+                          className="text-gray-500 hover:text-purple-400 p-2 transition-colors"
+                          title="Pair with another player"
+                        >
+                          🔗
+                        </button>
+                      )}
+                      {isLocked && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            unlockPartner(player.id);
+                          }}
+                          className="text-purple-400 hover:text-purple-300 p-2 transition-colors"
+                          title="Unpair"
+                        >
+                          ✂️
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          checkOutPlayer(player.id);
+                        }}
+                        className="text-gray-500 hover:text-red-400 p-2 transition-colors"
+                        title="Remove from queue"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </div>
                 );
               })}
+            </div>
+          )}
+          {selectedForPairing && (
+            <div className="px-4 py-2 bg-purple-900/30 text-purple-300 text-sm text-center">
+              Tap another player to pair as teammates
             </div>
           )}
         </section>

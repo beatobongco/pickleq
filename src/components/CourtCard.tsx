@@ -43,6 +43,10 @@ function TeamDisplay({
   const bgColor = team === 1 ? 'bg-[#1976D2]' : 'bg-[#F57C00]';
   const lightBg = team === 1 ? 'bg-[#1976D2]/10' : 'bg-[#F57C00]/10';
 
+  // Check if this team is a locked pair
+  const isLockedPair = teamPlayers.length === 2 &&
+    teamPlayers[0].lockedPartnerId === teamPlayers[1].id;
+
   return (
     <div className={`${lightBg} rounded-xl flex-1 overflow-hidden`}>
       {/* Team header bar */}
@@ -58,8 +62,9 @@ function TeamDisplay({
             key={player.id}
             className="px-2 py-1.5"
           >
-            <div className="font-semibold text-gray-900 truncate">
+            <div className="font-semibold text-gray-900 truncate flex items-center gap-1">
               {player.name}
+              {isLockedPair && <span className="text-purple-500 text-sm">🔗</span>}
             </div>
             {player.skill && (
               <div className="text-xs text-gray-500">

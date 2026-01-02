@@ -11,6 +11,7 @@ export interface Player {
   wins: number;
   losses: number;
   lastPartner: string | null;
+  lockedPartnerId: string | null;
   courtsPlayed: number[];
   checkedInAt: number | null;
 }
