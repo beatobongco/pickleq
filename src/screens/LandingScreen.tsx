@@ -59,7 +59,7 @@ export function LandingScreen({ onGetStarted }: LandingScreenProps) {
               <div className="text-4xl mb-3">👥</div>
               <h3 className="font-semibold text-gray-900 mb-2">Friend Groups</h3>
               <p className="text-gray-600 text-sm">
-                Organize pickup games at the park with automatic team balancing
+                Organize pickup games with automatic team balancing
               </p>
             </div>
           </div>
