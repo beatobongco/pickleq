@@ -54,14 +54,26 @@ export function SetupScreen() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
+            <button
               onClick={() => setScreen('venue-setup')}
-              title="Venue Settings"
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                venue
+                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                  : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+              }`}
             >
-              {venue ? '🌐' : '⚙️'}
-            </Button>
+              {venue ? (
+                <>
+                  <span className="text-green-500">☁️</span>
+                  Synced
+                </>
+              ) : (
+                <>
+                  <span>💾</span>
+                  Save to Cloud
+                </>
+              )}
+            </button>
             <Button
               variant="secondary"
               size="sm"

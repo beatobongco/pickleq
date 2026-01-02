@@ -9,10 +9,22 @@ import { announceLeaderboard } from '../utils/speech';
 import { getLocalVenue } from '../utils/supabase';
 import type { Player } from '../types';
 
+const CLOUD_BANNER_DISMISSED_KEY = 'dinksync_cloud_banner_dismissed';
+
 export function LeaderboardScreen() {
-  const { session, newSession, syncedSessionId } = useSession();
+  const { session, newSession, syncedSessionId, setScreen } = useSession();
   const venue = getLocalVenue();
   const hasAnnounced = useRef(false);
+  const [cloudBannerDismissed, setCloudBannerDismissed] = useState(
+    () => localStorage.getItem(CLOUD_BANNER_DISMISSED_KEY) === 'true'
+  );
+
+  const dismissCloudBanner = () => {
+    localStorage.setItem(CLOUD_BANNER_DISMISSED_KEY, 'true');
+    setCloudBannerDismissed(true);
+  };
+
+  const showCloudBanner = !venue && !cloudBannerDismissed;
 
   const leaderboard = calculateLeaderboard(session.players);
   const totalGames = session.matches.length;
@@ -51,6 +63,36 @@ export function LeaderboardScreen() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 pb-8">
+        {/* Cloud Sync Banner */}
+        {showCloudBanner && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 shadow-sm mb-6">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">☁️</span>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 mb-1">Save your results to the cloud</h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Keep player stats across devices and let players view their own leaderboard from their phones.
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setScreen('venue-setup')}
+                  >
+                    Set Up Now
+                  </Button>
+                  <button
+                    onClick={dismissCloudBanner}
+                    className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Maybe Later
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Session Stats */}
         <div className="bg-white rounded-2xl p-4 shadow-sm mb-6">
           <div className="grid grid-cols-3 gap-2 md:gap-4 text-center">
