@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import type { Match, Player, GameMode } from '../types';
 import { Button } from './Button';
 import { getSkillLabel } from './SkillSelector';
@@ -10,6 +11,20 @@ interface CourtCardProps {
   gameMode: GameMode;
   onRecordWinner: (matchId: string, winner: 1 | 2) => void;
   onRemovePlayer: (playerId: string, matchId: string) => void;
+}
+
+function ElapsedTime({ startTime }: { startTime: number }) {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  return <span>{mins}:{secs.toString().padStart(2, '0')}</span>;
 }
 
 function TeamDisplay({
@@ -28,18 +43,19 @@ function TeamDisplay({
   isSingles: boolean;
 }) {
   const teamPlayers = playerIds.map(id => players.find(p => p.id === id)).filter(Boolean) as Player[];
-  const bgColor = team === 1 ? 'bg-[#1976D2]/10' : 'bg-[#F57C00]/10';
-  const borderColor = team === 1 ? 'border-[#1976D2]' : 'border-[#F57C00]';
-  const textColor = team === 1 ? 'text-[#1976D2]' : 'text-[#F57C00]';
+  const bgColor = team === 1 ? 'bg-[#1976D2]' : 'bg-[#F57C00]';
+  const lightBg = team === 1 ? 'bg-[#1976D2]/10' : 'bg-[#F57C00]/10';
 
   return (
-    <div className={`${bgColor} ${borderColor} border-2 rounded-xl p-3 flex-1`}>
-      {!isSingles && (
-        <div className={`text-xs font-bold ${textColor} mb-2`}>
-          TEAM {team}
-        </div>
-      )}
-      <div className="space-y-2">
+    <div className={`${lightBg} rounded-xl flex-1 overflow-hidden`}>
+      {/* Team header bar */}
+      <div className={`${bgColor} px-3 py-1.5`}>
+        <span className="text-xs font-bold text-white tracking-wide">
+          {isSingles ? (teamPlayers[0]?.name.split(' ')[0].toUpperCase() || 'PLAYER') : `TEAM ${team}`}
+        </span>
+      </div>
+      {/* Players */}
+      <div className="p-2 space-y-1">
         {teamPlayers.map(player => (
           <button
             key={player.id}
@@ -47,18 +63,18 @@ function TeamDisplay({
             className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-white/50 transition-colors group"
           >
             <div className="flex items-center justify-between">
-              <span className={`font-medium text-gray-800 truncate ${isSingles ? 'text-lg' : ''}`}>
+              <span className="font-semibold text-gray-900 truncate">
                 {player.name}
               </span>
               <span className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                Remove
+                ✕
               </span>
             </div>
             {player.skill && (
-              <div className="text-sm">
+              <div className="text-xs text-gray-500">
                 <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
                 <span className="text-gray-300">{'★'.repeat(3 - player.skill)}</span>
-                <span className="text-gray-500 ml-1">{getSkillLabel(player.skill)}</span>
+                <span className="ml-1">{getSkillLabel(player.skill)}</span>
               </div>
             )}
           </button>
@@ -100,61 +116,75 @@ export function CourtCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
-      <div className="flex items-center justify-center gap-2 mb-4">
-        <div className="text-2xl font-bold text-gray-800">Court {court}</div>
-        <button
-          onClick={handleAnnounce}
-          className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-          title="Announce match"
-        >
-          🔊
-        </button>
-      </div>
-
-      <div className="flex gap-3 mb-4">
-        <TeamDisplay
-          playerIds={match.team1}
-          players={players}
-          team={1}
-          onRemovePlayer={onRemovePlayer}
-          matchId={match.id}
-          isSingles={isSingles}
-        />
-        <div className="flex items-center">
-          <span className="text-xl font-bold text-gray-400">vs</span>
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+      {/* Scoreboard header */}
+      <div className="bg-gray-900 px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-white font-bold text-lg">Court {court}</span>
+          <span className="flex items-center gap-1.5 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">
+            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+            LIVE
+          </span>
         </div>
-        <TeamDisplay
-          playerIds={match.team2}
-          players={players}
-          team={2}
-          onRemovePlayer={onRemovePlayer}
-          matchId={match.id}
-          isSingles={isSingles}
-        />
+        <div className="flex items-center gap-3">
+          <span className="text-gray-400 font-mono text-sm">
+            <ElapsedTime startTime={match.startTime} />
+          </span>
+          <button
+            onClick={handleAnnounce}
+            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+            title="Announce match"
+          >
+            🔊
+          </button>
+        </div>
       </div>
 
-      <div className="flex gap-3">
-        <Button
-          variant="team1"
-          size="lg"
-          onClick={() => onRecordWinner(match.id, 1)}
-          className="flex-1"
-        >
-          {isSingles
-            ? `${players.find(p => p.id === match.team1[0])?.name || 'Player 1'} Wins`
-            : 'Team 1 Wins'}
-        </Button>
-        <Button
-          variant="team2"
-          size="lg"
-          onClick={() => onRecordWinner(match.id, 2)}
-          className="flex-1"
-        >
-          {isSingles
-            ? `${players.find(p => p.id === match.team2[0])?.name || 'Player 2'} Wins`
-            : 'Team 2 Wins'}
-        </Button>
+      <div className="p-4">
+        <div className="flex gap-3 mb-4">
+          <TeamDisplay
+            playerIds={match.team1}
+            players={players}
+            team={1}
+            onRemovePlayer={onRemovePlayer}
+            matchId={match.id}
+            isSingles={isSingles}
+          />
+          <div className="flex items-center">
+            <span className="text-xl font-bold text-gray-400">vs</span>
+          </div>
+          <TeamDisplay
+            playerIds={match.team2}
+            players={players}
+            team={2}
+            onRemovePlayer={onRemovePlayer}
+            matchId={match.id}
+            isSingles={isSingles}
+          />
+        </div>
+
+        <div className="flex gap-3">
+          <Button
+            variant="team1"
+            size="lg"
+            onClick={() => onRecordWinner(match.id, 1)}
+            className="flex-1"
+          >
+            {isSingles
+              ? `${players.find(p => p.id === match.team1[0])?.name || 'Player 1'} Wins`
+              : 'Team 1 Wins'}
+          </Button>
+          <Button
+            variant="team2"
+            size="lg"
+            onClick={() => onRecordWinner(match.id, 2)}
+            className="flex-1"
+          >
+            {isSingles
+              ? `${players.find(p => p.id === match.team2[0])?.name || 'Player 2'} Wins`
+              : 'Team 2 Wins'}
+          </Button>
+        </div>
       </div>
     </div>
   );

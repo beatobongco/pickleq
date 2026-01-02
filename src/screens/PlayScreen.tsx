@@ -4,7 +4,6 @@ import { Button } from '../components/Button';
 import { CourtCard } from '../components/CourtCard';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerPicker } from '../components/PlayerPicker';
-import { getSkillLabel } from '../components/SkillSelector';
 import { UndoToast } from '../components/UndoToast';
 import { getPlayersWhoHaventPlayedRecently } from '../utils/matching';
 import { announceNextMatch, announceWinner, isMuted, setMuted } from '../utils/speech';
@@ -101,22 +100,33 @@ export function PlayScreen() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3">
+      {/* Header - scoreboard style */}
+      <header className="bg-gray-900 text-white px-4 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">{session.location}</h1>
-            <p className="text-sm text-gray-600">
-              {session.matches.length} games completed • {queue.length} in queue
-            </p>
+          <div className="flex items-center gap-6">
+            <h1 className="text-lg font-bold">{session.location}</h1>
+            <div className="hidden sm:flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1.5">
+                <span className="text-gray-400">GAMES</span>
+                <span className="font-bold text-xl">{session.matches.length}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-gray-400">COURTS</span>
+                <span className="font-bold text-xl">{session.activeMatches.length}/{session.courts}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-gray-400">QUEUE</span>
+                <span className="font-bold text-xl">{queue.length}</span>
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={toggleMute}
               className={`p-2 rounded-lg transition-colors ${
                 muted
-                  ? 'bg-gray-200 text-gray-500'
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+                  ? 'bg-gray-700 text-gray-400'
+                  : 'bg-gray-700 text-green-400 hover:bg-gray-600'
               }`}
               title={muted ? 'Unmute announcements' : 'Mute announcements'}
             >
@@ -136,7 +146,7 @@ export function PlayScreen() {
               size="sm"
               onClick={() => setShowEndConfirm(true)}
             >
-              End Session
+              End
             </Button>
           </div>
         </div>
@@ -157,7 +167,6 @@ export function PlayScreen() {
 
         {/* Courts Grid */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-700 mb-3">Courts</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {courts.map((court) => (
               <CourtCard
@@ -173,61 +182,73 @@ export function PlayScreen() {
           </div>
         </section>
 
-        {/* Queue */}
-        <section className="bg-white rounded-2xl p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-700 mb-3">
-            Waiting Queue ({queue.length})
-          </h2>
-          {(() => {
-            const playersNeeded = session.gameMode === 'doubles' ? 4 : 2;
-            const playersShort = playersNeeded - queue.length;
-            if (queue.length === 0) {
-              return (
-                <p className="text-gray-500 text-center py-4">
-                  No players in queue
-                </p>
-              );
-            } else if (playersShort > 0) {
-              return (
-                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-700 text-sm">
-                  Waiting for {playersShort} more player{playersShort > 1 ? 's' : ''} to start next match
-                </div>
-              );
-            }
-            return null;
-          })()}
-          <div className="space-y-2 max-h-[40vh] overflow-y-auto">
-            {queue.map((player, index) => (
-              <div
-                key={player.id}
-                className="flex items-center gap-2 md:gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl"
-              >
-                <span className="text-lg font-bold text-yellow-600 w-8 flex-shrink-0">
-                  #{index + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <span className="font-medium text-gray-900 truncate block">{player.name}</span>
-                  {player.skill && (
-                    <span className="text-xs text-gray-500">
-                      <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
-                      {' '}{getSkillLabel(player.skill)}
-                    </span>
-                  )}
-                </div>
-                <span className="text-xs md:text-sm text-gray-500 flex-shrink-0">
-                  {player.gamesPlayed}g
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => checkOutPlayer(player.id)}
-                  className="text-gray-500 hover:text-red-600 flex-shrink-0"
-                >
-                  Leave
-                </Button>
-              </div>
-            ))}
+        {/* Queue - styled as "Next Up" lineup */}
+        <section className="bg-gray-900 rounded-2xl overflow-hidden shadow-lg">
+          <div className="px-4 py-2 border-b border-gray-700 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-white font-bold">NEXT UP</span>
+              <span className="text-gray-400 text-sm">({queue.length})</span>
+            </div>
+            {(() => {
+              const playersNeeded = session.gameMode === 'doubles' ? 4 : 2;
+              const playersShort = playersNeeded - queue.length;
+              if (playersShort > 0 && queue.length > 0) {
+                return (
+                  <span className="text-yellow-400 text-xs">
+                    Need {playersShort} more
+                  </span>
+                );
+              }
+              return null;
+            })()}
           </div>
+          {queue.length === 0 ? (
+            <p className="text-gray-500 text-center py-6">
+              No players in queue
+            </p>
+          ) : (
+            <div className="divide-y divide-gray-800 max-h-[40vh] overflow-y-auto">
+              {queue.map((player, index) => {
+                const winRate = player.gamesPlayed > 0
+                  ? Math.round((player.wins / player.gamesPlayed) * 100)
+                  : null;
+                return (
+                  <div
+                    key={player.id}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors"
+                  >
+                    <span className="text-2xl font-bold text-gray-600 w-8 text-center flex-shrink-0">
+                      {index + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-white truncate block">{player.name}</span>
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        {player.skill && (
+                          <span>
+                            <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
+                            <span className="text-gray-600">{'★'.repeat(3 - player.skill)}</span>
+                          </span>
+                        )}
+                        <span>{player.gamesPlayed}G</span>
+                        {winRate !== null && (
+                          <span className={winRate >= 50 ? 'text-green-400' : 'text-gray-400'}>
+                            {winRate}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => checkOutPlayer(player.id)}
+                      className="text-gray-500 hover:text-red-400 p-2 transition-colors"
+                      title="Remove from queue"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* Add New Player */}

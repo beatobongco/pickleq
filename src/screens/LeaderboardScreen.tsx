@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
 import { QRCode } from '../components/QRCode';
-import { getSkillLabel } from '../components/SkillSelector';
 import { ShareModal } from '../components/ShareModal';
 import { calculateLeaderboard, getWinPercentage } from '../utils/matching';
 import { announceLeaderboard } from '../utils/speech';
@@ -148,8 +147,8 @@ export function LeaderboardScreen() {
 
         {/* Leaderboard */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-gray-100 px-4 py-3 border-b">
-            <h2 className="font-semibold text-gray-700">Final Standings</h2>
+          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+            <h2 className="font-bold text-gray-800">FINAL STANDINGS</h2>
           </div>
 
           {leaderboard.length === 0 ? (
@@ -168,15 +167,16 @@ export function LeaderboardScreen() {
                     key={player.id}
                     className={`
                       flex items-center gap-4 px-4 py-4
-                      ${isTopThree ? 'bg-yellow-50' : ''}
+                      ${isTopThree ? 'bg-yellow-50' : 'hover:bg-gray-50'}
+                      transition-colors
                     `}
                   >
                     {/* Rank */}
-                    <div className="w-12 text-center">
+                    <div className="w-10 text-center flex-shrink-0">
                       {medal ? (
                         <span className="text-2xl">{medal}</span>
                       ) : (
-                        <span className="text-lg font-bold text-gray-400">
+                        <span className="text-xl font-bold text-gray-400">
                           {index + 1}
                         </span>
                       )}
@@ -189,20 +189,20 @@ export function LeaderboardScreen() {
                           {player.name}
                         </span>
                         {player.skill && (
-                          <span className="text-sm text-gray-500">
+                          <span className="text-xs">
                             <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
-                            {' '}{getSkillLabel(player.skill)}
+                            <span className="text-gray-300">{'★'.repeat(3 - player.skill)}</span>
                           </span>
                         )}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {player.wins}-{player.losses} • {player.gamesPlayed} games
+                        {player.wins}-{player.losses} · {player.gamesPlayed} games
                       </div>
                     </div>
 
                     {/* Win Percentage */}
-                    <div className="text-right">
-                      <div className={`font-bold ${isTopThree ? 'text-2xl' : 'text-xl'} ${winPct >= 50 ? 'text-green-600' : 'text-gray-600'}`}>
+                    <div className="text-right flex-shrink-0">
+                      <div className={`font-bold ${isTopThree ? 'text-2xl' : 'text-xl'} ${winPct >= 50 ? 'text-green-600' : 'text-gray-500'}`}>
                         {winPct}%
                       </div>
                       <div className="text-xs text-gray-400">WIN RATE</div>
@@ -211,7 +211,7 @@ export function LeaderboardScreen() {
                     {/* Share Button */}
                     <button
                       onClick={() => setSharePlayer(player)}
-                      className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors flex-shrink-0"
                       title="Share stats"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
