@@ -6,7 +6,7 @@ import { PlayerCard } from '../components/PlayerCard';
 import { PlayerPicker } from '../components/PlayerPicker';
 import { UndoToast } from '../components/UndoToast';
 import { getPlayersWhoHaventPlayedRecently } from '../utils/matching';
-import { announceNextMatch, announceWinner, isMuted, setMuted } from '../utils/speech';
+import { announceNextMatch, announceWinner, isMuted, setMuted, cancelAllSpeech } from '../utils/speech';
 
 export function PlayScreen() {
   const {
@@ -33,6 +33,13 @@ export function PlayScreen() {
     setMutedState(newMuted);
     setMuted(newMuted);
   };
+
+  // Cancel all speech when leaving the play screen
+  useEffect(() => {
+    return () => {
+      cancelAllSpeech();
+    };
+  }, []);
 
   // Track announced matches to avoid re-announcing
   const announcedMatches = useRef<Set<string>>(new Set());

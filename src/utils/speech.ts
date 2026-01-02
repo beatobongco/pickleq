@@ -19,6 +19,14 @@ export function setMuted(muted: boolean): void {
   }
 }
 
+export function cancelAllSpeech(): void {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    speechQueue.length = 0;
+    isSpeaking = false;
+  }
+}
+
 function processQueue(): void {
   if (isSpeaking || speechQueue.length === 0) return;
 
