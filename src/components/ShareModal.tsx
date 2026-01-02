@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Button } from './Button';
 import { PlayerStatsCard } from './PlayerStatsCard';
 import { captureElement, shareImage, downloadImage, canNativeShare } from '../utils/share';
+import { trackStatsShared } from '../utils/analytics';
 import type { SkillLevel } from '../types';
 
 interface ShareModalProps {
@@ -41,6 +42,7 @@ export function ShareModal({ isOpen, onClose, player, location, venueName, rank,
       const blob = await captureElement(cardRef.current);
       console.log('Blob created:', blob.size, 'bytes');
       await shareImage(blob, `${player.name}'s PickleQ Stats`);
+      trackStatsShared(cardType || 'session', 'native');
       console.log('Share complete');
     } catch (err) {
       console.error('Failed to share:', err);
@@ -62,6 +64,7 @@ export function ShareModal({ isOpen, onClose, player, location, venueName, rank,
       const blob = await captureElement(cardRef.current);
       console.log('Blob created:', blob.size, 'bytes');
       downloadImage(blob);
+      trackStatsShared(cardType || 'session', 'download');
       console.log('Download triggered');
     } catch (err) {
       console.error('Failed to download:', err);

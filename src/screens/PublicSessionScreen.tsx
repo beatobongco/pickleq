@@ -8,6 +8,7 @@ import { getSkillLabel } from '../components/SkillSelector';
 import { PlayerStatsCard } from '../components/PlayerStatsCard';
 import { Button } from '../components/Button';
 import { captureElement, shareImage, downloadImage, canNativeShare } from '../utils/share';
+import { trackPublicSessionViewed, trackStatsShared } from '../utils/analytics';
 import type { Venue, VenueSession, SessionPlayer } from '../types';
 
 interface PublicSessionScreenProps {
@@ -55,6 +56,7 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
       }
 
       setSession(sessionData);
+      trackPublicSessionViewed(slug, sessionId);
 
       // Load session players
       const playersData = await getSessionPlayers(sessionId);
@@ -111,6 +113,7 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
     try {
       const blob = await captureElement(cardRef.current);
       await shareImage(blob, `${sharePlayer?.playerName}'s PickleQ Stats`);
+      trackStatsShared('session', 'native');
     } catch (err) {
       console.error('Failed to share:', err);
     } finally {
@@ -125,6 +128,7 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
     try {
       const blob = await captureElement(cardRef.current);
       downloadImage(blob);
+      trackStatsShared('session', 'download');
     } catch (err) {
       console.error('Failed to download:', err);
     } finally {

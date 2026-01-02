@@ -1,4 +1,4 @@
-import { useState, createContext, useContext } from 'react';
+import { useState, createContext, useContext, useEffect } from 'react';
 import { SessionProvider, useSession } from './store/useSession';
 import { SetupScreen } from './screens/SetupScreen';
 import { PlayScreen } from './screens/PlayScreen';
@@ -9,6 +9,8 @@ import { VenueSetupScreen } from './screens/VenueSetupScreen';
 import { PublicLeaderboardScreen } from './screens/PublicLeaderboardScreen';
 import { PublicSessionScreen } from './screens/PublicSessionScreen';
 import { LandingScreen } from './screens/LandingScreen';
+import { getLocalVenue } from './utils/supabase';
+import { identifyVenue } from './utils/analytics';
 
 const HAS_VISITED_KEY = 'pickleq_has_visited';
 
@@ -79,6 +81,14 @@ const initialRoute = parseInitialRoute();
 
 function App() {
   const [route, setRoute] = useState(initialRoute);
+
+  // Identify venue on app load if one is configured
+  useEffect(() => {
+    const venue = getLocalVenue();
+    if (venue) {
+      identifyVenue(venue.id, venue.name, venue.slug);
+    }
+  }, []);
 
   const handleGetStarted = () => {
     localStorage.setItem(HAS_VISITED_KEY, 'true');

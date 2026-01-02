@@ -11,6 +11,7 @@ import {
   clearLocalVenue,
   isSupabaseConfigured,
 } from '../utils/supabase';
+import { identifyVenue, resetIdentity, trackVenueCreated, trackVenueJoined } from '../utils/analytics';
 
 export function VenueSetupScreen() {
   const { setScreen } = useSession();
@@ -98,6 +99,8 @@ export function VenueSetupScreen() {
     const venue = await createVenue(slug, name.trim(), password);
 
     if (venue) {
+      identifyVenue(venue.id, venue.name, venue.slug);
+      trackVenueCreated(venue.slug, venue.name);
       setScreen('setup');
     } else {
       setError('Failed to create venue. Please try again.');
@@ -122,7 +125,9 @@ export function VenueSetupScreen() {
 
     const result = await joinVenue(joinSlug.trim(), joinPassword);
 
-    if (result.success) {
+    if (result.success && result.venue) {
+      identifyVenue(result.venue.id, result.venue.name, result.venue.slug);
+      trackVenueJoined(result.venue.slug, result.venue.name);
       setScreen('setup');
     } else {
       setError(result.error || 'Failed to join venue');
@@ -138,6 +143,7 @@ export function VenueSetupScreen() {
       localStorage.removeItem('dinksync_players');
       localStorage.removeItem('dinksync_locations');
       localStorage.removeItem('dinksync_session');
+      resetIdentity();
       showLanding?.();
     }
   };

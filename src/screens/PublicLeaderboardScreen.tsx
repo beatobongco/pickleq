@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { getVenueBySlug, getVenuePlayers, getVenueSessions } from '../utils/supabase';
 import { getSkillLabel } from '../components/SkillSelector';
 import { ShareModal } from '../components/ShareModal';
+import { trackPublicLeaderboardViewed } from '../utils/analytics';
 import type { Venue, VenuePlayer, VenueSession } from '../types';
 
 interface PublicLeaderboardScreenProps {
@@ -29,6 +30,7 @@ export function PublicLeaderboardScreen({ slug }: PublicLeaderboardScreenProps) 
       }
 
       setVenue(venueData);
+      trackPublicLeaderboardViewed(slug);
 
       const [playersData, sessionsData] = await Promise.all([
         getVenuePlayers(venueData.id),

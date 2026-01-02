@@ -1,10 +1,21 @@
+import { useEffect } from 'react';
 import { Button } from '../components/Button';
+import { trackLandingPageViewed, trackGetStartedClicked } from '../utils/analytics';
 
 interface LandingScreenProps {
   onGetStarted: () => void;
 }
 
 export function LandingScreen({ onGetStarted }: LandingScreenProps) {
+  useEffect(() => {
+    trackLandingPageViewed();
+  }, []);
+
+  const handleGetStarted = () => {
+    trackGetStartedClicked();
+    onGetStarted();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
       {/* Hero Section */}
@@ -14,7 +25,7 @@ export function LandingScreen({ onGetStarted }: LandingScreenProps) {
             <span className="text-3xl">🏓</span>
             <span className="text-2xl font-bold text-gray-900">PickleQ</span>
           </div>
-          <Button variant="primary" size="sm" onClick={onGetStarted}>
+          <Button variant="primary" size="sm" onClick={handleGetStarted}>
             Get Started
           </Button>
         </div>
@@ -30,7 +41,7 @@ export function LandingScreen({ onGetStarted }: LandingScreenProps) {
             The free, easy-to-use app for managing pickleball open play sessions.
             Handle check-ins, match players by skill, and keep courts rotating smoothly.
           </p>
-          <Button variant="primary" size="lg" onClick={onGetStarted} className="text-lg px-8">
+          <Button variant="primary" size="lg" onClick={handleGetStarted} className="text-lg px-8">
             Start Managing Open Play
           </Button>
         </section>
@@ -171,7 +182,7 @@ export function LandingScreen({ onGetStarted }: LandingScreenProps) {
           <p className="text-gray-600 mb-6">
             No signup required. Just tap the button and start your first session.
           </p>
-          <Button variant="primary" size="lg" onClick={onGetStarted} className="text-lg px-8">
+          <Button variant="primary" size="lg" onClick={handleGetStarted} className="text-lg px-8">
             Get Started Free
           </Button>
         </section>
