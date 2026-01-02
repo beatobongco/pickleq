@@ -58,7 +58,12 @@ export function createInitialSession(): Session {
 }
 
 function getCheckedInQueue(players: Player[]): Player[] {
-  return players.filter(p => p.status === 'checked-in');
+  // Filter to checked-in players, then sort by checkedInAt timestamp
+  // This ensures proper queue rotation: when players finish a game,
+  // their checkedInAt is updated to now, putting them at the back of the queue
+  return players
+    .filter(p => p.status === 'checked-in')
+    .sort((a, b) => (a.checkedInAt ?? 0) - (b.checkedInAt ?? 0));
 }
 
 function fillSingleCourt(state: SessionState, court: number): SessionState {
@@ -344,6 +349,8 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       };
 
       // Update player stats and return them to queue
+      // IMPORTANT: Update checkedInAt to NOW so they go to back of queue
+      const now = Date.now();
       const updatedPlayers = state.session.players.map(p => {
         if (winningTeam.includes(p.id)) {
           return {
@@ -351,6 +358,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
             status: 'checked-in' as const,
             gamesPlayed: p.gamesPlayed + 1,
             wins: p.wins + 1,
+            checkedInAt: now, // Go to back of queue
           };
         }
         if (losingTeam.includes(p.id)) {
@@ -359,6 +367,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
             status: 'checked-in' as const,
             gamesPlayed: p.gamesPlayed + 1,
             losses: p.losses + 1,
+            checkedInAt: now, // Go to back of queue
           };
         }
         return p;
