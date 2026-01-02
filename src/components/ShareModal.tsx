@@ -15,9 +15,10 @@ interface ShareModalProps {
     gamesPlayed: number;
   };
   location?: string;
+  venueName?: string;
 }
 
-export function ShareModal({ isOpen, onClose, player, location }: ShareModalProps) {
+export function ShareModal({ isOpen, onClose, player, location, venueName }: ShareModalProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
 
@@ -80,6 +81,7 @@ export function ShareModal({ isOpen, onClose, player, location }: ShareModalProp
               losses={player.losses}
               gamesPlayed={player.gamesPlayed}
               location={location}
+              venueName={venueName}
               date={currentDate}
             />
           </div>

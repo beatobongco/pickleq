@@ -55,10 +55,22 @@ export function LeaderboardScreen() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-orange-50">
       {/* Header */}
-      <header className="text-center py-8">
-        <div className="text-6xl mb-2">🏆</div>
-        <h1 className="text-3xl font-bold text-gray-900">Session Complete!</h1>
-        <p className="text-gray-600 mt-2">{session.location}</p>
+      <header className="bg-white border-b border-gray-200 px-4 py-4 mb-6">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <button
+            onClick={newSession}
+            className="text-left hover:opacity-80 transition-opacity"
+          >
+            <h1 className="text-2xl font-bold text-gray-900">🏓 PickleQ</h1>
+            <p className="text-gray-600 text-sm">Session Complete</p>
+          </button>
+          <div className="text-right">
+            <div className="text-4xl">🏆</div>
+            {venue && (
+              <p className="text-xs text-gray-500 mt-1">{venue.name}</p>
+            )}
+          </div>
+        </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 pb-8">
@@ -264,6 +276,7 @@ export function LeaderboardScreen() {
             gamesPlayed: sharePlayer.gamesPlayed,
           }}
           location={session.location}
+          venueName={venue?.name}
         />
       )}
     </div>

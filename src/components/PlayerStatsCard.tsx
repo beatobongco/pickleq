@@ -10,6 +10,7 @@ interface PlayerStatsCardProps {
   gamesPlayed: number;
   winStreak?: number;
   location?: string;
+  venueName?: string;
   date?: string;
   // Optional lifetime stats for session view
   lifetimeStats?: {
@@ -20,7 +21,7 @@ interface PlayerStatsCardProps {
 }
 
 export const PlayerStatsCard = forwardRef<HTMLDivElement, PlayerStatsCardProps>(
-  ({ name, skill, wins, losses, gamesPlayed, winStreak, location, date, lifetimeStats }, ref) => {
+  ({ name, skill, wins, losses, gamesPlayed, winStreak, location, venueName, date, lifetimeStats }, ref) => {
     const winRate = gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 100) : 0;
     const lifetimeWinRate = lifetimeStats && lifetimeStats.gamesPlayed > 0
       ? Math.round((lifetimeStats.wins / lifetimeStats.gamesPlayed) * 100)
@@ -119,11 +120,15 @@ export const PlayerStatsCard = forwardRef<HTMLDivElement, PlayerStatsCardProps>(
           </div>
         )}
 
-        {/* Location & Date */}
-        {(location || date) && (
+        {/* Venue, Location & Date */}
+        {(venueName || location || date) && (
           <div className="text-center text-white/60 text-sm mb-4">
-            {location && <div>@ {location}</div>}
-            {date && <div>{date}</div>}
+            {venueName && <div className="font-semibold text-white/80">{venueName}</div>}
+            {location && !venueName && <div>@ {location}</div>}
+            {location && venueName && location !== venueName && (
+              <div className="text-xs">@ {location}</div>
+            )}
+            {date && <div className="text-xs">{date}</div>}
           </div>
         )}
 
