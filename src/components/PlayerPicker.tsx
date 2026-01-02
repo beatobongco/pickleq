@@ -49,18 +49,24 @@ export function PlayerPicker({
 
   const handleAddPlayer = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPlayerName.trim()) {
-      // Check if there's an exact match in saved players to get their skill
-      const savedPlayer = availablePlayers.find(
-        p => p.name.toLowerCase() === newPlayerName.trim().toLowerCase()
-      );
-      if (savedPlayer) {
-        onAddPlayerWithSkill(savedPlayer.name, savedPlayer.skill);
-      } else {
-        onAddPlayer(newPlayerName);
-      }
-      setNewPlayerName('');
+    const trimmedName = newPlayerName.trim();
+    if (!trimmedName) return;
+
+    // Check for duplicate (case-insensitive)
+    if (sessionPlayerNames.some(n => n.toLowerCase() === trimmedName.toLowerCase())) {
+      return; // Don't add duplicates
     }
+
+    // Check if there's an exact match in saved players to get their skill
+    const savedPlayer = availablePlayers.find(
+      p => p.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+    if (savedPlayer) {
+      onAddPlayerWithSkill(savedPlayer.name, savedPlayer.skill);
+    } else {
+      onAddPlayer(trimmedName);
+    }
+    setNewPlayerName('');
   };
 
   const handleSelectPlayer = (player: SavedPlayer) => {
@@ -74,7 +80,9 @@ export function PlayerPicker({
   };
 
   const hasSearchQuery = newPlayerName.trim().length > 0;
-  const showNewPlayerOption = hasSearchQuery && !availablePlayers.some(
+  const lowerSessionNames = sessionPlayerNames.map(n => n.toLowerCase());
+  const isDuplicateName = lowerSessionNames.includes(newPlayerName.trim().toLowerCase());
+  const showNewPlayerOption = hasSearchQuery && !isDuplicateName && !availablePlayers.some(
     p => p.name.toLowerCase() === newPlayerName.trim().toLowerCase()
   );
 
@@ -145,8 +153,15 @@ export function PlayerPicker({
         </div>
       )}
 
+      {/* Duplicate name warning */}
+      {hasSearchQuery && isDuplicateName && (
+        <div className="text-center py-3 text-amber-600 bg-amber-50 rounded-xl">
+          <p className="text-sm">"{newPlayerName.trim()}" is already in this session</p>
+        </div>
+      )}
+
       {/* New Player hint when searching with no matches */}
-      {hasSearchQuery && availablePlayers.length === 0 && (
+      {hasSearchQuery && !isDuplicateName && availablePlayers.length === 0 && (
         <div className="text-center py-4 text-gray-500">
           <p className="text-sm">No saved players match "{newPlayerName}"</p>
           <Button
