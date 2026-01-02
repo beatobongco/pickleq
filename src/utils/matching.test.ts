@@ -205,6 +205,55 @@ describe('selectNextPlayers', () => {
       // Should return 4 players (falls through to default behavior)
       expect(result).toHaveLength(4);
     });
+
+    it('prioritizes fairness over locked pairs - non-locked players with fewer games go first', () => {
+      // Locked pair has played 5 games each
+      const pair1 = createPlayer({ name: 'Partner1', gamesPlayed: 5 });
+      const pair2 = createPlayer({ name: 'Partner2', gamesPlayed: 5 });
+      pair1.lockedPartnerId = pair2.id;
+      pair2.lockedPartnerId = pair1.id;
+
+      // Non-locked players have played 0 games - they should go first
+      const solo1 = createPlayer({ name: 'Solo1', gamesPlayed: 0 });
+      const solo2 = createPlayer({ name: 'Solo2', gamesPlayed: 0 });
+      const solo3 = createPlayer({ name: 'Solo3', gamesPlayed: 0 });
+      const solo4 = createPlayer({ name: 'Solo4', gamesPlayed: 0 });
+
+      const queue = [pair1, pair2, solo1, solo2, solo3, solo4];
+      const result = selectNextPlayers(queue, 'doubles')!;
+      const names = result.map(p => p.name);
+
+      // Locked pair should NOT be included - solo players with 0 games should play
+      expect(names).not.toContain('Partner1');
+      expect(names).not.toContain('Partner2');
+      expect(names).toContain('Solo1');
+      expect(names).toContain('Solo2');
+      expect(names).toContain('Solo3');
+      expect(names).toContain('Solo4');
+    });
+
+    it('includes locked pair when one member is in top 4 by priority', () => {
+      // Locked pair: one has 0 games, one has 5 games
+      const pair1 = createPlayer({ name: 'Partner1', gamesPlayed: 0 });
+      const pair2 = createPlayer({ name: 'Partner2', gamesPlayed: 5 });
+      pair1.lockedPartnerId = pair2.id;
+      pair2.lockedPartnerId = pair1.id;
+
+      // Solo players with varying games
+      const solo1 = createPlayer({ name: 'Solo1', gamesPlayed: 1 });
+      const solo2 = createPlayer({ name: 'Solo2', gamesPlayed: 2 });
+      const solo3 = createPlayer({ name: 'Solo3', gamesPlayed: 3 });
+
+      const queue = [pair1, pair2, solo1, solo2, solo3];
+      const result = selectNextPlayers(queue, 'doubles')!;
+      const names = result.map(p => p.name);
+
+      // Partner1 (0 games) is in top 4, so full pair should be included
+      expect(names).toContain('Partner1');
+      expect(names).toContain('Partner2');
+      // Plus 2 solo players with fewest games
+      expect(result).toHaveLength(4);
+    });
   });
 });
 

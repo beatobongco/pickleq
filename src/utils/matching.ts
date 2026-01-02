@@ -97,7 +97,7 @@ export function selectNextPlayers(queue: Player[], gameMode: GameMode): Player[]
     return [candidates[0].player, candidates[1].player];
   }
 
-  // For doubles, check for locked pairs first
+  // For doubles, balance fairness (games played) with locked pair constraints
   if (gameMode === 'doubles') {
     // Find all locked pairs in the queue
     const lockedPairs: Player[][] = [];
@@ -114,8 +114,26 @@ export function selectNextPlayers(queue: Player[], gameMode: GameMode): Player[]
       }
     }
 
-    // Sort pairs by average priority
-    lockedPairs.sort((pairA, pairB) => {
+    const nonLocked = queue.filter(p => !p.lockedPartnerId);
+
+    // Calculate priority for all candidates (lower = should play sooner)
+    const allCandidates: MatchCandidate[] = queue.map((player, index) => ({
+      player,
+      priority: calculatePriority(player, index),
+    }));
+    allCandidates.sort((a, b) => a.priority - b.priority);
+
+    // Get the top 4 by priority (who SHOULD play next based on fairness)
+    const top4 = allCandidates.slice(0, 4).map(c => c.player);
+    const top4Ids = new Set(top4.map(p => p.id));
+
+    // Check which locked pairs have at least one player in top 4
+    const relevantLockedPairs = lockedPairs.filter(pair =>
+      pair.some(p => top4Ids.has(p.id))
+    );
+
+    // Sort relevant pairs by average priority (most deserving first)
+    relevantLockedPairs.sort((pairA, pairB) => {
       const avgA = (calculatePriority(pairA[0], queue.indexOf(pairA[0])) +
                    calculatePriority(pairA[1], queue.indexOf(pairA[1]))) / 2;
       const avgB = (calculatePriority(pairB[0], queue.indexOf(pairB[0])) +
@@ -123,13 +141,31 @@ export function selectNextPlayers(queue: Player[], gameMode: GameMode): Player[]
       return avgA - avgB;
     });
 
-    const nonLocked = queue.filter(p => !p.lockedPartnerId);
+    // If no locked pairs are in top 4, just use top 4 (fairest selection)
+    if (relevantLockedPairs.length === 0) {
+      return top4;
+    }
 
-    // If we have at least 2 locked pairs
-    if (lockedPairs.length >= 2) {
-      // Check if the top 2 pairs just played against each other OR have a big skill gap
-      const shouldAvoidPairing = pairsJustPlayed(lockedPairs[0], lockedPairs[1]) ||
-                                  pairsHaveSkillGap(lockedPairs[0], lockedPairs[1]);
+    // If 1 locked pair has a player in top 4, include the full pair + 2 highest priority non-locked
+    if (relevantLockedPairs.length === 1) {
+      const pair = relevantLockedPairs[0];
+      // Get non-locked players sorted by priority
+      const nonLockedCandidates = allCandidates
+        .filter(c => !c.player.lockedPartnerId)
+        .slice(0, 2)
+        .map(c => c.player);
+
+      if (nonLockedCandidates.length >= 2) {
+        return [...pair, ...nonLockedCandidates];
+      }
+      // Not enough non-locked, check if we can use another locked pair
+    }
+
+    // If 2+ relevant locked pairs, pick the top 2 (avoiding rematch/skill gap)
+    if (relevantLockedPairs.length >= 2) {
+      // Check if top 2 pairs should avoid playing each other
+      const shouldAvoidPairing = pairsJustPlayed(relevantLockedPairs[0], relevantLockedPairs[1]) ||
+                                  pairsHaveSkillGap(relevantLockedPairs[0], relevantLockedPairs[1]);
 
       if (shouldAvoidPairing) {
         // Try to mix: use the highest priority pair with non-locked players
@@ -139,17 +175,16 @@ export function selectNextPlayers(queue: Player[], gameMode: GameMode): Player[]
             priority: calculatePriority(player, queue.indexOf(player)),
           }));
           candidates.sort((a, b) => a.priority - b.priority);
-          return [...lockedPairs[0], candidates[0].player, candidates[1].player];
+          return [...relevantLockedPairs[0], candidates[0].player, candidates[1].player];
         }
-        // If we have 3+ locked pairs, try to find a better skill match
-        if (lockedPairs.length >= 3) {
-          // Find the pair with closest skill to pair 0
-          const pair0Skill = getPairAverageSkill(lockedPairs[0]);
+        // If we have 3+ relevant locked pairs, try to find a better skill match
+        if (relevantLockedPairs.length >= 3) {
+          const pair0Skill = getPairAverageSkill(relevantLockedPairs[0]);
           let bestMatchIdx = 2;
           let bestGap = Infinity;
 
-          for (let i = 2; i < lockedPairs.length; i++) {
-            const pairSkill = getPairAverageSkill(lockedPairs[i]);
+          for (let i = 2; i < relevantLockedPairs.length; i++) {
+            const pairSkill = getPairAverageSkill(relevantLockedPairs[i]);
             if (pair0Skill !== null && pairSkill !== null) {
               const gap = Math.abs(pair0Skill - pairSkill);
               if (gap < bestGap) {
@@ -158,27 +193,24 @@ export function selectNextPlayers(queue: Player[], gameMode: GameMode): Player[]
               }
             }
           }
-          return [...lockedPairs[0], ...lockedPairs[bestMatchIdx]];
+          return [...relevantLockedPairs[0], ...relevantLockedPairs[bestMatchIdx]];
         }
-        // No choice but to have unbalanced match
       }
-      return [...lockedPairs[0], ...lockedPairs[1]];
+      return [...relevantLockedPairs[0], ...relevantLockedPairs[1]];
     }
 
-    // If we have exactly 1 locked pair, use them + 2 highest priority non-locked players
-    if (lockedPairs.length === 1) {
-      const pair = lockedPairs[0];
-      if (nonLocked.length >= 2) {
-        const candidates: MatchCandidate[] = nonLocked.map((player) => ({
-          player,
-          priority: calculatePriority(player, queue.indexOf(player)),
-        }));
-        candidates.sort((a, b) => a.priority - b.priority);
-        return [...pair, candidates[0].player, candidates[1].player];
+    // Fallback: 1 relevant pair but not enough non-locked players
+    // Use the pair + 2 best from remaining queue
+    if (relevantLockedPairs.length === 1) {
+      const pair = relevantLockedPairs[0];
+      const pairIds = new Set(pair.map(p => p.id));
+      const remaining = allCandidates
+        .filter(c => !pairIds.has(c.player.id))
+        .slice(0, 2)
+        .map(c => c.player);
+      if (remaining.length >= 2) {
+        return [...pair, ...remaining];
       }
-      // Not enough non-locked players - can't form a valid match with this locked pair
-      // Fall through to default behavior which will select 4 highest priority players
-      // This may split the locked pair, but it's better than being stuck
     }
   }
 
