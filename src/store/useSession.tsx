@@ -5,14 +5,16 @@ import { saveSession, loadSession, clearSession, generateId, saveLocation, updat
 import { selectNextPlayers, formTeams, createMatch, findSubstitute } from '../utils/matching';
 import { createSessionAndSync, processSyncQueue, getLocalVenue } from '../utils/supabase';
 
-interface SessionState {
+// Exported for testing
+export interface SessionState {
   session: Session;
   screen: AppScreen;
   undoAction: UndoAction | null;
   syncedSessionId: string | null;
 }
 
-type SessionAction =
+// Exported for testing
+export type SessionAction =
   | { type: 'LOAD_SESSION'; session: Session }
   | { type: 'SET_LOCATION'; location: string }
   | { type: 'SET_COURTS'; courts: number }
@@ -37,7 +39,8 @@ type SessionAction =
   | { type: 'LOCK_PARTNERS'; player1Id: string; player2Id: string }
   | { type: 'UNLOCK_PARTNER'; playerId: string };
 
-function createInitialSession(): Session {
+// Exported for testing
+export function createInitialSession(): Session {
   const savedLocations = getSavedLocations();
   const lastLocation = savedLocations[0];
 
@@ -169,7 +172,8 @@ function fillAvailableCourts(state: SessionState): SessionState {
   };
 }
 
-function sessionReducer(state: SessionState, action: SessionAction): SessionState {
+// Exported for testing
+export function sessionReducer(state: SessionState, action: SessionAction): SessionState {
   switch (action.type) {
     case 'LOAD_SESSION':
       return { ...state, session: action.session };
