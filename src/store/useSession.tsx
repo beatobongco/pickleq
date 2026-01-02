@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react';
 import type { Session, Player, Match, AppScreen, SkillLevel, UndoAction, GameMode } from '../types';
-import { saveSession, loadSession, clearSession, generateId, saveLocation, updatePlayerStats } from '../utils/storage';
+import { saveSession, loadSession, clearSession, generateId, saveLocation, updatePlayerStats, getSavedLocations } from '../utils/storage';
 import { selectNextPlayers, formTeams, createMatch, findSubstitute } from '../utils/matching';
 import { createSessionAndSync, processSyncQueue, getLocalVenue } from '../utils/supabase';
 
@@ -35,10 +35,13 @@ type SessionAction =
   | { type: 'SET_SYNCED_SESSION_ID'; sessionId: string | null };
 
 function createInitialSession(): Session {
+  const savedLocations = getSavedLocations();
+  const lastLocation = savedLocations[0];
+
   return {
     id: generateId(),
-    location: '',
-    courts: 4,
+    location: lastLocation?.name ?? '',
+    courts: lastLocation?.courts ?? 4,
     gameMode: 'doubles',
     players: [],
     matches: [],
