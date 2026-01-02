@@ -95,7 +95,7 @@ export function announceWinner(
 }
 
 export function announceLeaderboard(
-  topPlayers: { name: string; winPct: number }[]
+  topPlayers: { name: string; wins: number }[]
 ): void {
   if (topPlayers.length === 0) {
     announce('Session complete. No games were played.');
@@ -108,7 +108,8 @@ export function announceLeaderboard(
 
   topPlayers.slice(0, 3).forEach((player, index) => {
     const place = places[index];
-    announce(`${place}: ${player.name}, with ${player.winPct} percent wins.`);
+    const winWord = player.wins === 1 ? 'win' : 'wins';
+    announce(`${place}: ${player.name}, with ${player.wins} ${winWord}.`);
   });
 
   announce('Great games everyone!');

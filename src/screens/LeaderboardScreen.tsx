@@ -37,7 +37,7 @@ export function LeaderboardScreen() {
       hasAnnounced.current = true;
       const topPlayers = leaderboard.slice(0, 3).map(player => ({
         name: player.name,
-        winPct: getWinPercentage(player),
+        wins: player.wins,
       }));
       announceLeaderboard(topPlayers);
     }
@@ -212,12 +212,20 @@ export function LeaderboardScreen() {
                       </div>
                     </div>
 
-                    {/* Win Percentage */}
+                    {/* Wins (primary stat) */}
                     <div className="text-right flex-shrink-0">
-                      <div className={`font-bold ${isTopThree ? 'text-2xl' : 'text-xl'} ${winPct >= 50 ? 'text-green-600' : 'text-gray-500'}`}>
+                      <div className={`font-bold ${isTopThree ? 'text-2xl' : 'text-xl'} text-green-600`}>
+                        {player.wins}
+                      </div>
+                      <div className="text-xs text-gray-400">WINS</div>
+                    </div>
+
+                    {/* Win Rate (secondary) */}
+                    <div className="text-right flex-shrink-0 w-14 self-end">
+                      <div className={`font-semibold text-sm ${winPct >= 50 ? 'text-gray-600' : 'text-gray-400'}`}>
                         {winPct}%
                       </div>
-                      <div className="text-xs text-gray-400">WIN RATE</div>
+                      <div className="text-xs text-gray-400">WIN %</div>
                     </div>
 
                     {/* Share Button */}

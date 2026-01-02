@@ -179,15 +179,15 @@ export function calculateLeaderboard(players: Player[]): Player[] {
   const played = players.filter(p => p.gamesPlayed > 0);
 
   return played.sort((a, b) => {
-    // Primary: Win percentage (higher is better)
+    // Primary: Most wins (rewards playing and winning)
+    if (b.wins !== a.wins) return b.wins - a.wins;
+
+    // Tiebreaker 1: Win percentage (higher is better)
     const aWinPct = a.gamesPlayed > 0 ? a.wins / a.gamesPlayed : 0;
     const bWinPct = b.gamesPlayed > 0 ? b.wins / b.gamesPlayed : 0;
     if (bWinPct !== aWinPct) return bWinPct - aWinPct;
 
-    // Tiebreaker 1: Most wins
-    if (b.wins !== a.wins) return b.wins - a.wins;
-
-    // Tiebreaker 2: Fewer games played (rewards efficiency)
+    // Tiebreaker 2: Fewer games played (rewards efficiency at same wins)
     if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
 
     // Tiebreaker 3: Alphabetical

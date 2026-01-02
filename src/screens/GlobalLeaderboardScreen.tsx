@@ -11,16 +11,26 @@ export function GlobalLeaderboardScreen() {
 
   const players = useMemo(() => getSavedPlayers(), []);
 
-  const sortedPlayers = useMemo(() => {
-    return [...players]
+  const MIN_GAMES_FOR_RANKING = 10;
+
+  const { rankedPlayers, unrankedPlayers } = useMemo(() => {
+    const activePlayers = [...players]
       .filter(p => p.lifetimeGames > 0)
       .sort((a, b) => {
-        // Sort by win rate, then by games played
+        // Primary: Win percentage (higher = better)
         const aWinRate = a.lifetimeGames > 0 ? a.lifetimeWins / a.lifetimeGames : 0;
         const bWinRate = b.lifetimeGames > 0 ? b.lifetimeWins / b.lifetimeGames : 0;
         if (bWinRate !== aWinRate) return bWinRate - aWinRate;
-        return b.lifetimeGames - a.lifetimeGames;
+        // Tiebreaker 1: More games played (larger sample = more credible)
+        if (b.lifetimeGames !== a.lifetimeGames) return b.lifetimeGames - a.lifetimeGames;
+        // Tiebreaker 2: Alphabetical
+        return a.name.localeCompare(b.name);
       });
+
+    return {
+      rankedPlayers: activePlayers.filter(p => p.lifetimeGames >= MIN_GAMES_FOR_RANKING),
+      unrankedPlayers: activePlayers.filter(p => p.lifetimeGames < MIN_GAMES_FOR_RANKING),
+    };
   }, [players]);
 
   const getWinRate = (player: SavedPlayer) => {
@@ -72,21 +82,21 @@ export function GlobalLeaderboardScreen() {
           </div>
         </div>
 
-        {/* Leaderboard */}
+        {/* Ranked Leaderboard */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-gray-100 px-4 py-3 border-b">
             <h2 className="font-semibold text-gray-700">Rankings</h2>
           </div>
 
-          {sortedPlayers.length === 0 ? (
+          {rankedPlayers.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
-              <div className="text-4xl mb-3">🏓</div>
-              <p className="text-lg">No games played yet</p>
-              <p className="text-sm mt-1">Complete a session to see lifetime stats</p>
+              <div className="text-4xl mb-3">🏆</div>
+              <p className="text-lg">No ranked players yet</p>
+              <p className="text-sm mt-1">Play {MIN_GAMES_FOR_RANKING}+ games to get ranked</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
-              {sortedPlayers.map((player, index) => {
+              {rankedPlayers.map((player, index) => {
                 const medal = getMedal(index);
                 const winRate = getWinRate(player);
                 const isTopThree = index < 3;
@@ -130,7 +140,7 @@ export function GlobalLeaderboardScreen() {
                       </div>
                     </div>
 
-                    {/* Win Percentage */}
+                    {/* Win Rate (primary stat for all-time) */}
                     <div className="text-right">
                       <div className={`font-bold ${isTopThree ? 'text-2xl' : 'text-xl'} ${winRate >= 50 ? 'text-green-600' : 'text-gray-600'}`}>
                         {winRate}%
@@ -154,6 +164,76 @@ export function GlobalLeaderboardScreen() {
             </div>
           )}
         </div>
+
+        {/* Unranked Players */}
+        {unrankedPlayers.length > 0 && (
+          <div className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-gray-100 px-4 py-3 border-b">
+              <h2 className="font-semibold text-gray-500">
+                Unranked ({unrankedPlayers.length})
+              </h2>
+              <p className="text-xs text-gray-400 mt-0.5">Play {MIN_GAMES_FOR_RANKING} games to get ranked</p>
+            </div>
+
+            <div className="divide-y divide-gray-100">
+              {unrankedPlayers.map((player) => {
+                const winRate = getWinRate(player);
+                const gamesNeeded = MIN_GAMES_FOR_RANKING - player.lifetimeGames;
+
+                return (
+                  <div
+                    key={player.id}
+                    className="flex items-center gap-4 px-4 py-3"
+                  >
+                    {/* Progress indicator */}
+                    <div className="w-12 text-center">
+                      <span className="text-sm font-medium text-gray-400">
+                        {player.lifetimeGames}/{MIN_GAMES_FOR_RANKING}
+                      </span>
+                    </div>
+
+                    {/* Player Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium truncate text-gray-700">
+                          {player.name}
+                        </span>
+                        {player.skill && (
+                          <span className="text-sm text-gray-400">
+                            <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {player.lifetimeWins}W - {player.lifetimeLosses}L
+                        <span className="mx-1">•</span>
+                        {gamesNeeded} more to rank
+                      </div>
+                    </div>
+
+                    {/* Win Rate */}
+                    <div className="text-right">
+                      <div className="font-semibold text-gray-400">
+                        {winRate}%
+                      </div>
+                    </div>
+
+                    {/* Share Button */}
+                    <button
+                      onClick={() => setSharePlayer(player)}
+                      className="p-2 text-gray-300 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      title="Share stats"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Players with no games */}
         {players.filter(p => p.lifetimeGames === 0).length > 0 && (

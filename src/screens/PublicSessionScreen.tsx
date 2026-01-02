@@ -86,10 +86,16 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
     return [...players]
       .filter((p) => p.gamesPlayed > 0)
       .sort((a, b) => {
+        // Primary: Most wins
+        if (b.wins !== a.wins) return b.wins - a.wins;
+        // Tiebreaker 1: Win percentage
         const aWinRate = a.gamesPlayed > 0 ? a.wins / a.gamesPlayed : 0;
         const bWinRate = b.gamesPlayed > 0 ? b.wins / b.gamesPlayed : 0;
         if (bWinRate !== aWinRate) return bWinRate - aWinRate;
-        return b.gamesPlayed - a.gamesPlayed;
+        // Tiebreaker 2: Fewer games (efficiency)
+        if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
+        // Tiebreaker 3: Alphabetical
+        return a.playerName.localeCompare(b.playerName);
       });
   }, [players]);
 
@@ -282,16 +288,22 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
                       </div>
                     </div>
 
-                    {/* Win Percentage */}
+                    {/* Wins (primary stat) */}
                     <div className="text-right">
                       <div
-                        className={`font-bold ${isTopThree ? 'text-2xl' : 'text-xl'} ${
-                          winRate >= 50 ? 'text-green-600' : 'text-gray-600'
-                        }`}
+                        className={`font-bold ${isTopThree ? 'text-2xl' : 'text-xl'} text-green-600`}
                       >
+                        {player.wins}
+                      </div>
+                      <div className="text-xs text-gray-400">WINS</div>
+                    </div>
+
+                    {/* Win Rate (secondary) */}
+                    <div className="text-right w-14 self-end">
+                      <div className={`font-semibold text-sm ${winRate >= 50 ? 'text-gray-600' : 'text-gray-400'}`}>
                         {winRate}%
                       </div>
-                      <div className="text-xs text-gray-400">WIN RATE</div>
+                      <div className="text-xs text-gray-400">WIN %</div>
                     </div>
 
                     {/* Share indicator */}
