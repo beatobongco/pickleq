@@ -4,10 +4,12 @@ import { Button } from '../components/Button';
 import { getSkillLabel } from '../components/SkillSelector';
 import { ShareModal } from '../components/ShareModal';
 import { getSavedPlayers, type SavedPlayer } from '../utils/storage';
+import { getLocalVenue } from '../utils/supabase';
 
 export function GlobalLeaderboardScreen() {
   const { setScreen } = useSession();
   const [sharePlayer, setSharePlayer] = useState<SavedPlayer | null>(null);
+  const venue = getLocalVenue();
 
   const players = useMemo(() => getSavedPlayers(), []);
 
@@ -266,6 +268,7 @@ export function GlobalLeaderboardScreen() {
               losses: sharePlayer.lifetimeLosses,
               gamesPlayed: sharePlayer.lifetimeGames,
             }}
+            venueName={venue?.name}
             rank={isRanked ? rankIndex + 1 : undefined}
             totalRankedPlayers={isRanked ? rankedPlayers.length : undefined}
             cardType="alltime"
