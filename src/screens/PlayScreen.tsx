@@ -6,7 +6,6 @@ import { PlayerCard } from '../components/PlayerCard';
 import { PlayerPicker } from '../components/PlayerPicker';
 import { SkillSelector } from '../components/SkillSelector';
 import { UndoToast } from '../components/UndoToast';
-import { getPlayersWhoHaventPlayedRecently } from '../utils/matching';
 import { announceNextMatch, announceWinner, isMuted, setMuted, cancelAllSpeech } from '../utils/speech';
 
 export function PlayScreen() {
@@ -79,11 +78,6 @@ export function PlayScreen() {
       }
     }
   }, [session.activeMatches, session.players]);
-
-  const playersNeedingAttention = getPlayersWhoHaventPlayedRecently(
-    session.players,
-    session.activeMatches
-  );
 
   const notHerePlayers = session.players.filter(p => p.status === 'not-here');
   const leftPlayers = session.players.filter(p => p.status === 'left');
@@ -174,18 +168,6 @@ export function PlayScreen() {
       </header>
 
       <main className="max-w-6xl mx-auto p-4 space-y-6">
-        {/* Alert for players waiting too long */}
-        {playersNeedingAttention.length > 0 && (
-          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4">
-            <div className="font-semibold text-yellow-800 mb-1">
-              Players waiting too long
-            </div>
-            <div className="text-yellow-700 text-sm">
-              {playersNeedingAttention.map(p => p.name).join(', ')} haven't played in 3+ rotations
-            </div>
-          </div>
-        )}
-
         {/* Courts Grid */}
         <section>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

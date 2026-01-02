@@ -426,35 +426,6 @@ export function findSubstitute(
   return candidates[0]?.player ?? null;
 }
 
-export function getPlayersWhoHaventPlayedRecently(
-  players: Player[],
-  _activeMatches: Match[],
-  rotationThreshold: number = 2
-): Player[] {
-  // Find players who are checked in (waiting in queue)
-  const checkedIn = players.filter(p => p.status === 'checked-in');
-
-  // Need at least 2 checked-in players to compare
-  if (checkedIn.length < 2) return [];
-
-  // Calculate average games among ALL active players (checked-in + playing)
-  // This gives a fair baseline to compare against
-  const activePlayers = players.filter(p => p.status === 'checked-in' || p.status === 'playing');
-  if (activePlayers.length === 0) return [];
-
-  const avgGames = activePlayers.reduce((sum, p) => sum + p.gamesPlayed, 0) / activePlayers.length;
-
-  // Find the minimum games played among checked-in players
-  const minGames = Math.min(...checkedIn.map(p => p.gamesPlayed));
-
-  // Alert if a checked-in player is more than threshold games behind the average
-  // AND they have the minimum games played (they're actually the most behind)
-  return checkedIn.filter(p =>
-    avgGames - p.gamesPlayed >= rotationThreshold &&
-    p.gamesPlayed === minGames
-  );
-}
-
 export function calculateLeaderboard(players: Player[]): Player[] {
   // Filter to only players who played at least one game
   const played = players.filter(p => p.gamesPlayed > 0);

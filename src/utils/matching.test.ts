@@ -6,7 +6,6 @@ import {
   findSubstitute,
   calculateLeaderboard,
   getWinPercentage,
-  getPlayersWhoHaventPlayedRecently,
 } from './matching';
 
 // Helper to create test players
@@ -517,76 +516,5 @@ describe('getWinPercentage', () => {
   it('rounds to nearest integer', () => {
     const player = createPlayer({ gamesPlayed: 3, wins: 1, losses: 2 });
     expect(getWinPercentage(player)).toBe(33); // 33.33... rounds to 33
-  });
-});
-
-describe('getPlayersWhoHaventPlayedRecently', () => {
-  it('returns empty array when less than 2 checked-in players', () => {
-    const players = [
-      createPlayer({ status: 'checked-in', gamesPlayed: 0 }),
-    ];
-    expect(getPlayersWhoHaventPlayedRecently(players, [])).toEqual([]);
-  });
-
-  it('returns empty array when no one is significantly behind', () => {
-    const players = [
-      createPlayer({ status: 'checked-in', gamesPlayed: 3 }),
-      createPlayer({ status: 'checked-in', gamesPlayed: 4 }),
-      createPlayer({ status: 'checked-in', gamesPlayed: 5 }),
-    ];
-    // avg = 4, max difference = 1, threshold = 3
-    expect(getPlayersWhoHaventPlayedRecently(players, [])).toEqual([]);
-  });
-
-  it('returns players who are 3+ games behind average', () => {
-    const behindPlayer = createPlayer({ name: 'Behind', status: 'checked-in', gamesPlayed: 1 });
-    const players = [
-      behindPlayer,
-      createPlayer({ status: 'checked-in', gamesPlayed: 5 }),
-      createPlayer({ status: 'checked-in', gamesPlayed: 6 }),
-    ];
-    // avg = 4, behindPlayer is 3 behind
-    const result = getPlayersWhoHaventPlayedRecently(players, []);
-    expect(result).toContain(behindPlayer);
-  });
-
-  it('includes playing players in average calculation', () => {
-    // This is the key fix - average should include playing players
-    const waitingPlayer = createPlayer({ name: 'Waiting', status: 'checked-in', gamesPlayed: 0 });
-    const players = [
-      waitingPlayer,
-      createPlayer({ status: 'checked-in', gamesPlayed: 1 }),
-      createPlayer({ status: 'playing', gamesPlayed: 6 }),  // playing, not checked-in
-      createPlayer({ status: 'playing', gamesPlayed: 6 }),  // playing, not checked-in
-    ];
-    // If we only counted checked-in: avg = 0.5, nobody behind
-    // With playing players: avg = 3.25, waitingPlayer is 3.25 behind → flagged
-    const result = getPlayersWhoHaventPlayedRecently(players, []);
-    expect(result).toContain(waitingPlayer);
-  });
-
-  it('clears warning when behind player starts playing', () => {
-    // Player who was behind is now playing - should not appear in results
-    const players = [
-      createPlayer({ name: 'WasWaiting', status: 'playing', gamesPlayed: 0 }),  // now playing
-      createPlayer({ status: 'checked-in', gamesPlayed: 5 }),
-      createPlayer({ status: 'checked-in', gamesPlayed: 6 }),
-    ];
-    // Only checked-in players can be in the "waiting too long" list
-    const result = getPlayersWhoHaventPlayedRecently(players, []);
-    const names = result.map(p => p.name);
-    expect(names).not.toContain('WasWaiting');
-  });
-
-  it('excludes players who left or not here from calculation', () => {
-    const players = [
-      createPlayer({ status: 'checked-in', gamesPlayed: 2 }),
-      createPlayer({ status: 'checked-in', gamesPlayed: 3 }),
-      createPlayer({ status: 'left', gamesPlayed: 10 }),  // should be excluded
-      createPlayer({ status: 'not-here', gamesPlayed: 10 }),  // should be excluded
-    ];
-    // avg should be (2+3)/2 = 2.5, not inflated by left/not-here players
-    // nobody is 3+ behind 2.5
-    expect(getPlayersWhoHaventPlayedRecently(players, [])).toEqual([]);
   });
 });
