@@ -91,11 +91,10 @@ export function ShareModal({ isOpen, onClose, player, location, venueName, rank,
           </button>
         </div>
 
-        {/* Preview */}
+        {/* Preview - scaled for display only */}
         <div className="flex justify-center mb-6 overflow-hidden">
           <div className="transform scale-[0.85] origin-top">
             <PlayerStatsCard
-              ref={cardRef}
               name={player.name}
               skill={player.skill}
               wins={player.wins}
@@ -109,6 +108,24 @@ export function ShareModal({ isOpen, onClose, player, location, venueName, rank,
               cardType={cardType}
             />
           </div>
+        </div>
+
+        {/* Hidden card for capturing - rendered at full size without transforms */}
+        <div className="absolute -left-[9999px]">
+          <PlayerStatsCard
+            ref={cardRef}
+            name={player.name}
+            skill={player.skill}
+            wins={player.wins}
+            losses={player.losses}
+            gamesPlayed={player.gamesPlayed}
+            location={location}
+            venueName={venueName}
+            date={currentDate}
+            rank={rank}
+            totalPlayers={totalRankedPlayers}
+            cardType={cardType}
+          />
         </div>
 
         {/* Actions */}
