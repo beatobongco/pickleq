@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, createContext, useContext } from 'react';
 import { SessionProvider, useSession } from './store/useSession';
 import { SetupScreen } from './screens/SetupScreen';
 import { PlayScreen } from './screens/PlayScreen';
@@ -11,6 +11,43 @@ import { PublicSessionScreen } from './screens/PublicSessionScreen';
 import { LandingScreen } from './screens/LandingScreen';
 
 const HAS_VISITED_KEY = 'pickleq_has_visited';
+
+// Parse initial route from URL (runs once at load time)
+function parseInitialRoute(): {
+  type: 'landing' | 'app' | 'venue' | 'session';
+  venueSlug?: string;
+  sessionId?: string;
+} {
+  // Handle GitHub Pages SPA redirect
+  const params = new URLSearchParams(window.location.search);
+  const redirectPath = params.get('p');
+  if (redirectPath) {
+    window.history.replaceState(null, '', redirectPath);
+  }
+
+  const path = window.location.pathname;
+
+  // /app route - always show the staff app
+  if (path === '/app' || path === '/app/') {
+    localStorage.setItem(HAS_VISITED_KEY, 'true');
+    return { type: 'app' };
+  }
+
+  // /venue/:slug/session/:sessionId - public session results
+  const sessionMatch = path.match(/^\/venue\/([a-z0-9-]+)\/session\/([a-z0-9-]+)\/?$/i);
+  if (sessionMatch) {
+    return { type: 'session', venueSlug: sessionMatch[1], sessionId: sessionMatch[2] };
+  }
+
+  // /venue/:slug - public venue leaderboard
+  const venueMatch = path.match(/^\/venue\/([a-z0-9-]+)\/?$/i);
+  if (venueMatch) {
+    return { type: 'venue', venueSlug: venueMatch[1] };
+  }
+
+  // / - always show landing page
+  return { type: 'landing' };
+}
 
 // Context for navigating back to landing page
 const LandingContext = createContext<(() => void) | null>(null);
@@ -37,63 +74,37 @@ function AppContent() {
   }
 }
 
+// Parse route once at module load time
+const initialRoute = parseInitialRoute();
+
 function App() {
-  const [venueSlug, setVenueSlug] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [showLanding, setShowLanding] = useState<boolean>(() => {
-    // Show landing if user hasn't visited before
-    return !localStorage.getItem(HAS_VISITED_KEY);
-  });
-
-  useEffect(() => {
-    // Handle GitHub Pages SPA redirect
-    const params = new URLSearchParams(window.location.search);
-    const redirectPath = params.get('p');
-    if (redirectPath) {
-      window.history.replaceState(null, '', redirectPath);
-    }
-
-    // Check routing
-    const path = window.location.pathname;
-
-    // Check for session route: /venue/:slug/session/:sessionId
-    const sessionMatch = path.match(/^\/venue\/([a-z0-9-]+)\/session\/([a-z0-9-]+)\/?$/i);
-    if (sessionMatch) {
-      setVenueSlug(sessionMatch[1]);
-      setSessionId(sessionMatch[2]);
-      return;
-    }
-
-    // Check for venue route: /venue/:slug
-    const venueMatch = path.match(/^\/venue\/([a-z0-9-]+)\/?$/i);
-    if (venueMatch) {
-      setVenueSlug(venueMatch[1]);
-    }
-  }, []);
+  const [route, setRoute] = useState(initialRoute);
 
   const handleGetStarted = () => {
     localStorage.setItem(HAS_VISITED_KEY, 'true');
-    setShowLanding(false);
+    setRoute({ type: 'app' });
+    window.history.pushState(null, '', '/app');
+  };
+
+  const handleShowLanding = () => {
+    setRoute({ type: 'landing' });
+    window.history.pushState(null, '', '/');
   };
 
   // Public session page (shareable session results)
-  if (venueSlug && sessionId) {
-    return <PublicSessionScreen slug={venueSlug} sessionId={sessionId} />;
+  if (route.type === 'session' && route.venueSlug && route.sessionId) {
+    return <PublicSessionScreen slug={route.venueSlug} sessionId={route.sessionId} />;
   }
 
   // Public venue leaderboard (no session provider needed)
-  if (venueSlug) {
-    return <PublicLeaderboardScreen slug={venueSlug} />;
+  if (route.type === 'venue' && route.venueSlug) {
+    return <PublicLeaderboardScreen slug={route.venueSlug} />;
   }
 
   // Landing page for new visitors
-  if (showLanding) {
+  if (route.type === 'landing') {
     return <LandingScreen onGetStarted={handleGetStarted} />;
   }
-
-  const handleShowLanding = () => {
-    setShowLanding(true);
-  };
 
   // Staff app with full session management
   return (
