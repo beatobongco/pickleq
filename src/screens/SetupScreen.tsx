@@ -43,7 +43,7 @@ export function SetupScreen() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">🏓 PickleQ</h1>
             <p className="text-gray-600 text-sm">
-              Pickleball Open Play Manager
+              Open Play Manager
               <span className="mx-1">•</span>
               <a
                 href="how-to-use.html"
