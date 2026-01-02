@@ -15,7 +15,6 @@ export function PlayScreen() {
     undoAction,
     recordWinner,
     undoWinner,
-    removeFromCourt,
     checkInPlayer,
     checkOutPlayer,
     endSession,
@@ -193,7 +192,6 @@ export function PlayScreen() {
                 gameMode={session.gameMode}
                 queueLength={queue.length}
                 onRecordWinner={handleRecordWinner}
-                onRemovePlayer={removeFromCourt}
                 onStartNextMatch={fillCourt}
               />
             ))}
@@ -303,20 +301,28 @@ export function PlayScreen() {
 
         {/* Left Early */}
         {leftPlayers.length > 0 && (
-          <section className="bg-white rounded-2xl p-4 shadow-sm opacity-60">
+          <section className="bg-white rounded-2xl p-4 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-500 mb-3">
-              Left Early ({leftPlayers.length})
+              Left ({leftPlayers.length})
             </h2>
             <div className="space-y-2">
               {leftPlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="p-3 bg-gray-100 rounded-xl"
+                  className="p-3 bg-gray-100 rounded-xl flex items-center justify-between"
                 >
-                  <span className="text-gray-500 line-through">{player.name}</span>
-                  <span className="ml-3 text-sm text-gray-400">
-                    {player.wins}-{player.losses} ({player.gamesPlayed} games)
-                  </span>
+                  <div>
+                    <span className="text-gray-600">{player.name}</span>
+                    <span className="ml-3 text-sm text-gray-400">
+                      {player.wins}-{player.losses} ({player.gamesPlayed} games)
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => checkInPlayer(player.id)}
+                    className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors"
+                  >
+                    Check In
+                  </button>
                 </div>
               ))}
             </div>

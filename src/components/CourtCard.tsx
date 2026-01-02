@@ -11,7 +11,6 @@ interface CourtCardProps {
   gameMode: GameMode;
   queueLength: number;
   onRecordWinner: (matchId: string, winner: 1 | 2) => void;
-  onRemovePlayer: (playerId: string, matchId: string) => void;
   onStartNextMatch: (court: number) => void;
 }
 
@@ -33,15 +32,11 @@ function TeamDisplay({
   playerIds,
   players,
   team,
-  onRemovePlayer,
-  matchId,
   isSingles,
 }: {
   playerIds: string[];
   players: Player[];
   team: 1 | 2;
-  onRemovePlayer: (playerId: string, matchId: string) => void;
-  matchId: string;
   isSingles: boolean;
 }) {
   const teamPlayers = playerIds.map(id => players.find(p => p.id === id)).filter(Boolean) as Player[];
@@ -59,18 +54,12 @@ function TeamDisplay({
       {/* Players */}
       <div className="p-2 space-y-1">
         {teamPlayers.map(player => (
-          <button
+          <div
             key={player.id}
-            onClick={() => onRemovePlayer(player.id, matchId)}
-            className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-white/50 transition-colors group"
+            className="px-2 py-1.5"
           >
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-gray-900 truncate">
-                {player.name}
-              </span>
-              <span className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                ✕
-              </span>
+            <div className="font-semibold text-gray-900 truncate">
+              {player.name}
             </div>
             {player.skill && (
               <div className="text-xs text-gray-500">
@@ -79,7 +68,7 @@ function TeamDisplay({
                 <span className="ml-1">{getSkillLabel(player.skill)}</span>
               </div>
             )}
-          </button>
+          </div>
         ))}
       </div>
     </div>
@@ -93,7 +82,6 @@ export function CourtCard({
   gameMode,
   queueLength,
   onRecordWinner,
-  onRemovePlayer,
   onStartNextMatch,
 }: CourtCardProps) {
   const isSingles = gameMode === 'singles';
@@ -170,8 +158,6 @@ export function CourtCard({
             playerIds={match.team1}
             players={players}
             team={1}
-            onRemovePlayer={onRemovePlayer}
-            matchId={match.id}
             isSingles={isSingles}
           />
           <div className="flex items-center">
@@ -181,8 +167,6 @@ export function CourtCard({
             playerIds={match.team2}
             players={players}
             team={2}
-            onRemovePlayer={onRemovePlayer}
-            matchId={match.id}
             isSingles={isSingles}
           />
         </div>
