@@ -672,6 +672,30 @@ export async function getVenueRoster(venueId: string): Promise<Array<{ name: str
   }));
 }
 
+// Get recent sessions for a venue (for session history)
+export async function getVenueSessions(venueId: string, limit: number = 20): Promise<VenueSession[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('venue_id', venueId)
+    .order('ended_at', { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+
+  return data.map((s) => ({
+    id: s.id,
+    venueId: s.venue_id,
+    location: s.location,
+    courts: s.courts,
+    totalGames: s.total_games,
+    startedAt: s.started_at,
+    endedAt: s.ended_at,
+  }));
+}
+
 // Add a new player to the roster (for when they're first added to a session)
 export async function addToRoster(name: string, skill: SkillLevel): Promise<void> {
   const venue = getLocalVenue();
