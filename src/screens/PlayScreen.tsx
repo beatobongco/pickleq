@@ -22,6 +22,7 @@ export function PlayScreen() {
     clearUndo,
     addPlayer,
     addPlayerWithSkill,
+    fillCourt,
   } = useSession();
 
   const [showEndConfirm, setShowEndConfirm] = useState(false);
@@ -190,8 +191,10 @@ export function PlayScreen() {
                 match={getMatchForCourt(court)}
                 players={session.players}
                 gameMode={session.gameMode}
+                queueLength={queue.length}
                 onRecordWinner={handleRecordWinner}
                 onRemovePlayer={removeFromCourt}
+                onStartNextMatch={fillCourt}
               />
             ))}
           </div>

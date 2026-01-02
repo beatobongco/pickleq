@@ -9,8 +9,10 @@ interface CourtCardProps {
   match?: Match;
   players: Player[];
   gameMode: GameMode;
+  queueLength: number;
   onRecordWinner: (matchId: string, winner: 1 | 2) => void;
   onRemovePlayer: (playerId: string, matchId: string) => void;
+  onStartNextMatch: (court: number) => void;
 }
 
 function ElapsedTime({ startTime }: { startTime: number }) {
@@ -89,17 +91,39 @@ export function CourtCard({
   match,
   players,
   gameMode,
+  queueLength,
   onRecordWinner,
   onRemovePlayer,
+  onStartNextMatch,
 }: CourtCardProps) {
   const isSingles = gameMode === 'singles';
+  const playersNeeded = isSingles ? 2 : 4;
+  const canStartMatch = queueLength >= playersNeeded;
 
   if (!match) {
     return (
       <div className="bg-gray-100 rounded-2xl p-4 border-2 border-dashed border-gray-300">
         <div className="text-center">
           <div className="text-2xl font-bold text-gray-400 mb-1">Court {court}</div>
-          <div className="text-gray-400">Waiting for players...</div>
+          {canStartMatch ? (
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => onStartNextMatch(court)}
+              className="mt-2"
+            >
+              Start Next Match
+            </Button>
+          ) : (
+            <div className="text-gray-400">
+              Waiting for players...
+              {queueLength > 0 && (
+                <span className="block text-sm mt-1">
+                  ({queueLength}/{playersNeeded} in queue)
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );

@@ -32,6 +32,7 @@ type SessionAction =
   | { type: 'UNDO_WINNER'; matchId: string }
   | { type: 'NEW_SESSION' }
   | { type: 'FILL_COURTS' }
+  | { type: 'FILL_COURT'; court: number }
   | { type: 'SET_SYNCED_SESSION_ID'; sessionId: string | null };
 
 function createInitialSession(): Session {
@@ -53,6 +54,53 @@ function createInitialSession(): Session {
 
 function getCheckedInQueue(players: Player[]): Player[] {
   return players.filter(p => p.status === 'checked-in');
+}
+
+function fillSingleCourt(state: SessionState, court: number): SessionState {
+  const { session } = state;
+  const queue = getCheckedInQueue(session.players);
+
+  // Check if court is already occupied
+  const isCourtOccupied = session.activeMatches.some(m => m.court === court);
+  if (isCourtOccupied) return state;
+
+  const selectedPlayers = selectNextPlayers(queue, session.gameMode);
+  if (!selectedPlayers) return state;
+
+  const teams = formTeams(selectedPlayers, session.gameMode);
+  if (!teams) return state;
+
+  const match = createMatch(court, teams.team1, teams.team2);
+
+  // Update player statuses and partners
+  const playerIds = [...match.team1, ...match.team2];
+  const updatedPlayers = session.players.map(p => {
+    if (!playerIds.includes(p.id)) return p;
+
+    const isTeam1 = match.team1.includes(p.id);
+    // For singles, there's no partner
+    const partnerId = session.gameMode === 'doubles'
+      ? (isTeam1
+          ? match.team1.find(id => id !== p.id)
+          : match.team2.find(id => id !== p.id)) ?? null
+      : null;
+
+    return {
+      ...p,
+      status: 'playing' as const,
+      lastPartner: partnerId,
+      courtsPlayed: [...p.courtsPlayed, court],
+    };
+  });
+
+  return {
+    ...state,
+    session: {
+      ...session,
+      players: updatedPlayers,
+      activeMatches: [...session.activeMatches, match],
+    },
+  };
 }
 
 function fillAvailableCourts(state: SessionState): SessionState {
@@ -327,8 +375,9 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
         },
       };
 
-      // Fill the now-vacant court
-      return fillAvailableCourts(newState);
+      // Don't auto-fill - let staff manually start next match
+      // This allows waiting for other courts to finish so players can mix
+      return newState;
     }
 
     case 'UNDO_WINNER': {
@@ -482,6 +531,9 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
     case 'FILL_COURTS':
       return fillAvailableCourts(state);
 
+    case 'FILL_COURT':
+      return fillSingleCourt(state, action.court);
+
     case 'SET_SYNCED_SESSION_ID':
       return { ...state, syncedSessionId: action.sessionId };
 
@@ -516,6 +568,8 @@ interface SessionContextValue {
   setScreen: (screen: AppScreen) => void;
   clearUndo: () => void;
   newSession: () => void;
+  fillCourts: () => void;
+  fillCourt: (court: number) => void;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -646,6 +700,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_UNDO', action: null }), []),
     newSession: useCallback(() =>
       dispatch({ type: 'NEW_SESSION' }), []),
+    fillCourts: useCallback(() =>
+      dispatch({ type: 'FILL_COURTS' }), []),
+    fillCourt: useCallback((court: number) =>
+      dispatch({ type: 'FILL_COURT', court }), []),
   };
 
   return (
