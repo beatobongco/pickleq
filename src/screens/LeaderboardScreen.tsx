@@ -272,21 +272,27 @@ export function LeaderboardScreen() {
       </main>
 
       {/* Share Modal */}
-      {sharePlayer && (
-        <ShareModal
-          isOpen={true}
-          onClose={() => setSharePlayer(null)}
-          player={{
-            name: sharePlayer.name,
-            skill: sharePlayer.skill,
-            wins: sharePlayer.wins,
-            losses: sharePlayer.losses,
-            gamesPlayed: sharePlayer.gamesPlayed,
-          }}
-          location={session.location}
-          venueName={venue?.name}
-        />
-      )}
+      {sharePlayer && (() => {
+        const rankIndex = leaderboard.findIndex(p => p.id === sharePlayer.id);
+        return (
+          <ShareModal
+            isOpen={true}
+            onClose={() => setSharePlayer(null)}
+            player={{
+              name: sharePlayer.name,
+              skill: sharePlayer.skill,
+              wins: sharePlayer.wins,
+              losses: sharePlayer.losses,
+              gamesPlayed: sharePlayer.gamesPlayed,
+            }}
+            location={session.location}
+            venueName={venue?.name}
+            rank={rankIndex !== -1 ? rankIndex + 1 : undefined}
+            totalRankedPlayers={leaderboard.length}
+            cardType="session"
+          />
+        );
+      })()}
     </div>
   );
 }
