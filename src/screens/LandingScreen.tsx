@@ -148,6 +148,18 @@ export function LandingScreen({ onGetStarted }: LandingScreenProps) {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-green-600">✓</span>
+                <span className="text-gray-700">Doubles and singles modes</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-green-600">✓</span>
+                <span className="text-gray-700">Lock partners (couples always play together)</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-green-600">✓</span>
+                <span className="text-gray-700">Voice announcements for matches</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-green-600">✓</span>
                 <span className="text-gray-700">Multiple court support (1-10)</span>
               </div>
               <div className="flex items-center gap-3">
@@ -161,10 +173,6 @@ export function LandingScreen({ onGetStarted }: LandingScreenProps) {
               <div className="flex items-center gap-3">
                 <span className="text-green-600">✓</span>
                 <span className="text-gray-700">Shareable stats cards for players</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-green-600">✓</span>
-                <span className="text-gray-700">Cloud sync across devices</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-green-600">✓</span>
