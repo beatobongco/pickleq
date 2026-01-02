@@ -1,4 +1,4 @@
-import type { Player, Match } from '../types';
+import type { Player, Match, GameMode } from '../types';
 import { generateId } from './storage';
 
 interface MatchCandidate {
@@ -13,8 +13,9 @@ function calculatePriority(player: Player, queuePosition: number): number {
   return player.gamesPlayed * 1000 + queuePosition;
 }
 
-export function selectNextFourPlayers(queue: Player[]): Player[] | null {
-  if (queue.length < 4) return null;
+export function selectNextPlayers(queue: Player[], gameMode: GameMode): Player[] | null {
+  const needed = gameMode === 'doubles' ? 4 : 2;
+  if (queue.length < needed) return null;
 
   const candidates: MatchCandidate[] = queue.map((player, index) => ({
     player,
@@ -24,14 +25,22 @@ export function selectNextFourPlayers(queue: Player[]): Player[] | null {
   // Sort by priority (lowest first = should play next)
   candidates.sort((a, b) => a.priority - b.priority);
 
-  // Take the 4 highest priority players
-  return candidates.slice(0, 4).map(c => c.player);
+  // Take the required number of highest priority players
+  return candidates.slice(0, needed).map(c => c.player);
 }
 
 export function formTeams(
   players: Player[],
+  gameMode: GameMode,
   avoidPartners: boolean = true
-): { team1: [Player, Player]; team2: [Player, Player] } | null {
+): { team1: Player[]; team2: Player[] } | null {
+  // Singles mode: 2 players, one per "team"
+  if (gameMode === 'singles') {
+    if (players.length !== 2) return null;
+    return { team1: [players[0]], team2: [players[1]] };
+  }
+
+  // Doubles mode: 4 players, 2 per team
   if (players.length !== 4) return null;
 
   const sorted = [...players];
@@ -45,8 +54,8 @@ export function formTeams(
 
     // Try to form balanced teams: High+Low vs High+Low
     // sorted[0] = highest skill, sorted[3] = lowest skill
-    let team1: [Player, Player] = [sorted[0], sorted[3]];
-    let team2: [Player, Player] = [sorted[1], sorted[2]];
+    let team1: Player[] = [sorted[0], sorted[3]];
+    let team2: Player[] = [sorted[1], sorted[2]];
 
     // Check if we should avoid recent partners
     if (avoidPartners) {
@@ -57,8 +66,8 @@ export function formTeams(
 
       // If both teams have recent partners, try swapping
       if (team1WasRecent || team2WasRecent) {
-        const altTeam1: [Player, Player] = [sorted[0], sorted[2]];
-        const altTeam2: [Player, Player] = [sorted[1], sorted[3]];
+        const altTeam1: Player[] = [sorted[0], sorted[2]];
+        const altTeam2: Player[] = [sorted[1], sorted[3]];
 
         const altTeam1Recent = sorted[0].lastPartner === sorted[2].id ||
                               sorted[2].lastPartner === sorted[0].id;
@@ -81,8 +90,8 @@ export function formTeams(
     // No skill levels - random assignment
     const shuffled = [...sorted].sort(() => Math.random() - 0.5);
 
-    let team1: [Player, Player] = [shuffled[0], shuffled[1]];
-    let team2: [Player, Player] = [shuffled[2], shuffled[3]];
+    let team1: Player[] = [shuffled[0], shuffled[1]];
+    let team2: Player[] = [shuffled[2], shuffled[3]];
 
     // Try to avoid recent partners even in random mode
     if (avoidPartners) {
@@ -102,14 +111,14 @@ export function formTeams(
 
 export function createMatch(
   court: number,
-  team1: [Player, Player],
-  team2: [Player, Player]
+  team1: Player[],
+  team2: Player[]
 ): Match {
   return {
     id: generateId(),
     court,
-    team1: [team1[0].id, team1[1].id],
-    team2: [team2[0].id, team2[1].id],
+    team1: team1.map(p => p.id),
+    team2: team2.map(p => p.id),
     winner: null,
     startTime: Date.now(),
     endTime: null,

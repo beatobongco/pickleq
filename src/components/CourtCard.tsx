@@ -1,4 +1,4 @@
-import type { Match, Player } from '../types';
+import type { Match, Player, GameMode } from '../types';
 import { Button } from './Button';
 import { getSkillLabel } from './SkillSelector';
 import { announceNextMatch } from '../utils/speech';
@@ -7,6 +7,7 @@ interface CourtCardProps {
   court: number;
   match?: Match;
   players: Player[];
+  gameMode: GameMode;
   onRecordWinner: (matchId: string, winner: 1 | 2) => void;
   onRemovePlayer: (playerId: string, matchId: string) => void;
 }
@@ -17,12 +18,14 @@ function TeamDisplay({
   team,
   onRemovePlayer,
   matchId,
+  isSingles,
 }: {
-  playerIds: [string, string];
+  playerIds: string[];
   players: Player[];
   team: 1 | 2;
   onRemovePlayer: (playerId: string, matchId: string) => void;
   matchId: string;
+  isSingles: boolean;
 }) {
   const teamPlayers = playerIds.map(id => players.find(p => p.id === id)).filter(Boolean) as Player[];
   const bgColor = team === 1 ? 'bg-[#1976D2]/10' : 'bg-[#F57C00]/10';
@@ -31,9 +34,11 @@ function TeamDisplay({
 
   return (
     <div className={`${bgColor} ${borderColor} border-2 rounded-xl p-3 flex-1`}>
-      <div className={`text-xs font-bold ${textColor} mb-2`}>
-        TEAM {team}
-      </div>
+      {!isSingles && (
+        <div className={`text-xs font-bold ${textColor} mb-2`}>
+          TEAM {team}
+        </div>
+      )}
       <div className="space-y-2">
         {teamPlayers.map(player => (
           <button
@@ -42,7 +47,7 @@ function TeamDisplay({
             className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-white/50 transition-colors group"
           >
             <div className="flex items-center justify-between">
-              <span className="font-medium text-gray-800 truncate">
+              <span className={`font-medium text-gray-800 truncate ${isSingles ? 'text-lg' : ''}`}>
                 {player.name}
               </span>
               <span className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -67,9 +72,12 @@ export function CourtCard({
   court,
   match,
   players,
+  gameMode,
   onRecordWinner,
   onRemovePlayer,
 }: CourtCardProps) {
+  const isSingles = gameMode === 'singles';
+
   if (!match) {
     return (
       <div className="bg-gray-100 rounded-2xl p-4 border-2 border-dashed border-gray-300">
@@ -111,6 +119,7 @@ export function CourtCard({
           team={1}
           onRemovePlayer={onRemovePlayer}
           matchId={match.id}
+          isSingles={isSingles}
         />
         <div className="flex items-center">
           <span className="text-xl font-bold text-gray-400">vs</span>
@@ -121,6 +130,7 @@ export function CourtCard({
           team={2}
           onRemovePlayer={onRemovePlayer}
           matchId={match.id}
+          isSingles={isSingles}
         />
       </div>
 
@@ -131,7 +141,9 @@ export function CourtCard({
           onClick={() => onRecordWinner(match.id, 1)}
           className="flex-1"
         >
-          Team 1 Wins
+          {isSingles
+            ? `${players.find(p => p.id === match.team1[0])?.name || 'Player 1'} Wins`
+            : 'Team 1 Wins'}
         </Button>
         <Button
           variant="team2"
@@ -139,7 +151,9 @@ export function CourtCard({
           onClick={() => onRecordWinner(match.id, 2)}
           className="flex-1"
         >
-          Team 2 Wins
+          {isSingles
+            ? `${players.find(p => p.id === match.team2[0])?.name || 'Player 2'} Wins`
+            : 'Team 2 Wins'}
         </Button>
       </div>
     </div>

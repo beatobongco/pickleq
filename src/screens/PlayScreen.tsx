@@ -165,6 +165,7 @@ export function PlayScreen() {
                 court={court}
                 match={getMatchForCourt(court)}
                 players={session.players}
+                gameMode={session.gameMode}
                 onRecordWinner={handleRecordWinner}
                 onRemovePlayer={removeFromCourt}
               />
@@ -177,15 +178,24 @@ export function PlayScreen() {
           <h2 className="text-lg font-semibold text-gray-700 mb-3">
             Waiting Queue ({queue.length})
           </h2>
-          {queue.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">
-              No players in queue
-            </p>
-          ) : queue.length < 4 ? (
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-700 text-sm">
-              Waiting for {4 - queue.length} more player{4 - queue.length > 1 ? 's' : ''} to start next match
-            </div>
-          ) : null}
+          {(() => {
+            const playersNeeded = session.gameMode === 'doubles' ? 4 : 2;
+            const playersShort = playersNeeded - queue.length;
+            if (queue.length === 0) {
+              return (
+                <p className="text-gray-500 text-center py-4">
+                  No players in queue
+                </p>
+              );
+            } else if (playersShort > 0) {
+              return (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-700 text-sm">
+                  Waiting for {playersShort} more player{playersShort > 1 ? 's' : ''} to start next match
+                </div>
+              );
+            }
+            return null;
+          })()}
           <div className="space-y-2 max-h-[40vh] overflow-y-auto">
             {queue.map((player, index) => (
               <div

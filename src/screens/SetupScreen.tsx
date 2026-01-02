@@ -13,6 +13,7 @@ export function SetupScreen() {
     canStartSession,
     setLocation,
     setCourts,
+    setGameMode,
     addPlayer,
     addPlayerWithSkill,
     removePlayer,
@@ -145,6 +146,35 @@ export function SetupScreen() {
           </div>
         </section>
 
+        {/* Game Mode */}
+        <section className="bg-white rounded-2xl p-4 shadow-sm">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Game Mode
+          </label>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setGameMode('doubles')}
+              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
+                session.gameMode === 'doubles'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Doubles (4 players)
+            </button>
+            <button
+              onClick={() => setGameMode('singles')}
+              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
+                session.gameMode === 'singles'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Singles (2 players)
+            </button>
+          </div>
+        </section>
+
         {/* Add Players */}
         <section className="bg-white rounded-2xl p-4 shadow-sm">
           <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -224,7 +254,7 @@ export function SetupScreen() {
           >
             {canStartSession
               ? 'START PLAY'
-              : `${checkedInCount}/4 players checked in${!session.location.trim() ? ' • Need location' : ''}`}
+              : `${checkedInCount}/${session.gameMode === 'doubles' ? 4 : 2} players checked in${!session.location.trim() ? ' • Need location' : ''}`}
           </Button>
         </div>
       </div>

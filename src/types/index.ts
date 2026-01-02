@@ -1,5 +1,6 @@
 export type PlayerStatus = 'not-here' | 'checked-in' | 'playing' | 'left';
 export type SkillLevel = 1 | 2 | 3 | null;
+export type GameMode = 'doubles' | 'singles';
 
 export interface Player {
   id: string;
@@ -17,8 +18,8 @@ export interface Player {
 export interface Match {
   id: string;
   court: number;
-  team1: [string, string];
-  team2: [string, string];
+  team1: string[]; // 2 players for doubles, 1 for singles
+  team2: string[]; // 2 players for doubles, 1 for singles
   winner: 1 | 2 | null;
   startTime: number;
   endTime: number | null;
@@ -28,6 +29,7 @@ export interface Session {
   id: string;
   location: string;
   courts: number;
+  gameMode: GameMode;
   players: Player[];
   matches: Match[];
   activeMatches: Match[];

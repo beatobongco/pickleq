@@ -18,7 +18,12 @@ export function loadSession(): Session | null {
   const data = localStorage.getItem(STORAGE_KEY);
   if (!data) return null;
   try {
-    return JSON.parse(data) as Session;
+    const session = JSON.parse(data) as Session;
+    // Migration: ensure gameMode exists (added in singles mode update)
+    if (!session.gameMode) {
+      session.gameMode = 'doubles';
+    }
+    return session;
   } catch {
     return null;
   }

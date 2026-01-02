@@ -1,8 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react';
-import type { Session, Player, Match, AppScreen, SkillLevel, UndoAction } from '../types';
+import type { Session, Player, Match, AppScreen, SkillLevel, UndoAction, GameMode } from '../types';
 import { saveSession, loadSession, clearSession, generateId, saveLocation, updatePlayerStats } from '../utils/storage';
-import { selectNextFourPlayers, formTeams, createMatch, findSubstitute } from '../utils/matching';
+import { selectNextPlayers, formTeams, createMatch, findSubstitute } from '../utils/matching';
 import { createSessionAndSync, processSyncQueue, getLocalVenue } from '../utils/supabase';
 
 interface SessionState {
@@ -16,6 +16,7 @@ type SessionAction =
   | { type: 'LOAD_SESSION'; session: Session }
   | { type: 'SET_LOCATION'; location: string }
   | { type: 'SET_COURTS'; courts: number }
+  | { type: 'SET_GAME_MODE'; gameMode: GameMode }
   | { type: 'ADD_PLAYER'; name: string }
   | { type: 'ADD_PLAYER_WITH_SKILL'; name: string; skill: SkillLevel }
   | { type: 'REMOVE_PLAYER'; playerId: string }
@@ -38,6 +39,7 @@ function createInitialSession(): Session {
     id: generateId(),
     location: '',
     courts: 4,
+    gameMode: 'doubles',
     players: [],
     matches: [],
     activeMatches: [],
@@ -69,10 +71,10 @@ function fillAvailableCourts(state: SessionState): SessionState {
   let currentQueue = queue;
 
   for (const court of availableCourts) {
-    const selectedPlayers = selectNextFourPlayers(currentQueue);
+    const selectedPlayers = selectNextPlayers(currentQueue, session.gameMode);
     if (!selectedPlayers) break;
 
-    const teams = formTeams(selectedPlayers);
+    const teams = formTeams(selectedPlayers, session.gameMode);
     if (!teams) break;
 
     const match = createMatch(court, teams.team1, teams.team2);
@@ -83,9 +85,12 @@ function fillAvailableCourts(state: SessionState): SessionState {
       if (!playerIds.includes(p.id)) return p;
 
       const isTeam1 = match.team1.includes(p.id);
-      const partnerId = isTeam1
-        ? match.team1.find(id => id !== p.id)!
-        : match.team2.find(id => id !== p.id)!;
+      // For singles, there's no partner
+      const partnerId = session.gameMode === 'doubles'
+        ? (isTeam1
+            ? match.team1.find(id => id !== p.id)
+            : match.team2.find(id => id !== p.id)) ?? null
+        : null;
 
       return {
         ...p,
@@ -126,6 +131,12 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
       return {
         ...state,
         session: { ...state.session, courts: Math.max(1, Math.min(10, action.courts)) },
+      };
+
+    case 'SET_GAME_MODE':
+      return {
+        ...state,
+        session: { ...state.session, gameMode: action.gameMode },
       };
 
     case 'ADD_PLAYER': {
@@ -409,18 +420,19 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
 
       // Find which team the removed player was on
       const isTeam1 = match.team1.includes(action.playerId);
-      const newTeam1: [string, string] = isTeam1
-        ? [match.team1[0] === action.playerId ? substitute.id : match.team1[0],
-           match.team1[1] === action.playerId ? substitute.id : match.team1[1]]
+      const newTeam1 = isTeam1
+        ? match.team1.map(id => id === action.playerId ? substitute.id : id)
         : match.team1;
-      const newTeam2: [string, string] = !isTeam1
-        ? [match.team2[0] === action.playerId ? substitute.id : match.team2[0],
-           match.team2[1] === action.playerId ? substitute.id : match.team2[1]]
+      const newTeam2 = !isTeam1
+        ? match.team2.map(id => id === action.playerId ? substitute.id : id)
         : match.team2;
 
-      const partnerId = isTeam1
-        ? newTeam1.find(id => id !== substitute.id)!
-        : newTeam2.find(id => id !== substitute.id)!;
+      // For doubles, find partner; for singles, no partner
+      const partnerId = state.session.gameMode === 'doubles'
+        ? (isTeam1
+            ? newTeam1.find(id => id !== substitute.id)
+            : newTeam2.find(id => id !== substitute.id)) ?? null
+        : null;
 
       return {
         ...state,
@@ -486,6 +498,7 @@ interface SessionContextValue {
   dispatch: React.Dispatch<SessionAction>;
   setLocation: (location: string) => void;
   setCourts: (courts: number) => void;
+  setGameMode: (gameMode: GameMode) => void;
   addPlayer: (name: string) => void;
   addPlayerWithSkill: (name: string, skill: SkillLevel) => void;
   removePlayer: (playerId: string) => void;
@@ -582,7 +595,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     p => p.status === 'checked-in' || p.status === 'playing'
   ).length;
 
-  const canStartSession = checkedInCount >= 4 && state.session.location.trim() !== '';
+  const minPlayers = state.session.gameMode === 'doubles' ? 4 : 2;
+  const canStartSession = checkedInCount >= minPlayers && state.session.location.trim() !== '';
 
   const queue = getCheckedInQueue(state.session.players);
 
@@ -599,6 +613,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_LOCATION', location }), []),
     setCourts: useCallback((courts: number) =>
       dispatch({ type: 'SET_COURTS', courts }), []),
+    setGameMode: useCallback((gameMode: GameMode) =>
+      dispatch({ type: 'SET_GAME_MODE', gameMode }), []),
     addPlayer: useCallback((name: string) =>
       dispatch({ type: 'ADD_PLAYER', name }), []),
     addPlayerWithSkill: useCallback((name: string, skill: SkillLevel) =>
