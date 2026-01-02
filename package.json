@@ -13,7 +13,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.89.0",
     "@tailwindcss/vite": "^4.1.18",
-    "html2canvas": "^1.4.1",
+    "modern-screenshot": "^4.6.7",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

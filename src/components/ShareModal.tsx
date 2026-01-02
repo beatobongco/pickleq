@@ -30,28 +30,42 @@ export function ShareModal({ isOpen, onClose, player, location, venueName, rank,
   if (!isOpen) return null;
 
   const handleShare = async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current) {
+      console.error('Share failed: cardRef is null');
+      return;
+    }
 
     setIsSharing(true);
     try {
+      console.log('Capturing element...');
       const blob = await captureElement(cardRef.current);
+      console.log('Blob created:', blob.size, 'bytes');
       await shareImage(blob, `${player.name}'s PickleQ Stats`);
+      console.log('Share complete');
     } catch (err) {
       console.error('Failed to share:', err);
+      alert('Failed to share. Please try again.');
     } finally {
       setIsSharing(false);
     }
   };
 
   const handleDownload = async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current) {
+      console.error('Download failed: cardRef is null');
+      return;
+    }
 
     setIsSharing(true);
     try {
+      console.log('Capturing element for download...');
       const blob = await captureElement(cardRef.current);
+      console.log('Blob created:', blob.size, 'bytes');
       downloadImage(blob);
+      console.log('Download triggered');
     } catch (err) {
       console.error('Failed to download:', err);
+      alert('Failed to save image. Please try again.');
     } finally {
       setIsSharing(false);
     }

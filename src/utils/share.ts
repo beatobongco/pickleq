@@ -1,21 +1,13 @@
-import html2canvas from 'html2canvas';
+import { domToPng } from 'modern-screenshot';
 
 export async function captureElement(element: HTMLElement): Promise<Blob> {
-  const canvas = await html2canvas(element, {
-    backgroundColor: null,
+  const dataUrl = await domToPng(element, {
     scale: 2, // Higher quality
-    logging: false,
   });
 
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) {
-        resolve(blob);
-      } else {
-        reject(new Error('Failed to create image blob'));
-      }
-    }, 'image/png');
-  });
+  // Convert data URL to blob
+  const response = await fetch(dataUrl);
+  return response.blob();
 }
 
 export async function shareImage(blob: Blob, title: string): Promise<boolean> {
