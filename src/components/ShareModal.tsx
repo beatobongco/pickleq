@@ -16,9 +16,14 @@ interface ShareModalProps {
   };
   location?: string;
   venueName?: string;
+  // All-time ranking info (only for ranked players)
+  rank?: number;
+  totalRankedPlayers?: number;
+  // Card type for styling
+  cardType?: 'session' | 'alltime';
 }
 
-export function ShareModal({ isOpen, onClose, player, location, venueName }: ShareModalProps) {
+export function ShareModal({ isOpen, onClose, player, location, venueName, rank, totalRankedPlayers, cardType }: ShareModalProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
 
@@ -52,10 +57,9 @@ export function ShareModal({ isOpen, onClose, player, location, venueName }: Sha
     }
   };
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
+  const currentDate = cardType === 'alltime'
+    ? `as of ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+    : new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -83,6 +87,9 @@ export function ShareModal({ isOpen, onClose, player, location, venueName }: Sha
               location={location}
               venueName={venueName}
               date={currentDate}
+              rank={rank}
+              totalPlayers={totalRankedPlayers}
+              cardType={cardType}
             />
           </div>
         </div>

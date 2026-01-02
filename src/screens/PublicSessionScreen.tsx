@@ -3,13 +3,12 @@ import {
   getVenueBySlug,
   getSessionById,
   getSessionPlayers,
-  getPlayerLifetimeStats,
 } from '../utils/supabase';
 import { getSkillLabel } from '../components/SkillSelector';
 import { PlayerStatsCard } from '../components/PlayerStatsCard';
 import { Button } from '../components/Button';
 import { captureElement, shareImage, downloadImage, canNativeShare } from '../utils/share';
-import type { Venue, VenueSession, SessionPlayer, VenuePlayer } from '../types';
+import type { Venue, VenueSession, SessionPlayer } from '../types';
 
 interface PublicSessionScreenProps {
   slug: string;
@@ -23,7 +22,6 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sharePlayer, setSharePlayer] = useState<SessionPlayer | null>(null);
-  const [lifetimeStats, setLifetimeStats] = useState<VenuePlayer | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -66,21 +64,6 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
 
     loadSession();
   }, [slug, sessionId]);
-
-  // Load lifetime stats when a player is selected for sharing
-  useEffect(() => {
-    async function loadLifetimeStats() {
-      if (!sharePlayer || !venue) {
-        setLifetimeStats(null);
-        return;
-      }
-
-      const stats = await getPlayerLifetimeStats(venue.id, sharePlayer.playerName);
-      setLifetimeStats(stats);
-    }
-
-    loadLifetimeStats();
-  }, [sharePlayer, venue]);
 
   const sortedPlayers = useMemo(() => {
     return [...players]
@@ -371,17 +354,11 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
                   wins={sharePlayer.wins}
                   losses={sharePlayer.losses}
                   gamesPlayed={sharePlayer.gamesPlayed}
+                  venueName={venue.name}
                   location={session.location}
                   date={formatDate(session.endedAt)}
-                  lifetimeStats={
-                    lifetimeStats
-                      ? {
-                          wins: lifetimeStats.lifetimeWins,
-                          losses: lifetimeStats.lifetimeLosses,
-                          gamesPlayed: lifetimeStats.lifetimeGames,
-                        }
-                      : undefined
-                  }
+                  rank={sortedPlayers.findIndex(p => p.id === sharePlayer.id) + 1}
+                  totalPlayers={totalPlayers}
                 />
               </div>
             </div>

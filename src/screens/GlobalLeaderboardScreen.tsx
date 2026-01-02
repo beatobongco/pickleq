@@ -252,19 +252,26 @@ export function GlobalLeaderboardScreen() {
       </main>
 
       {/* Share Modal */}
-      {sharePlayer && (
-        <ShareModal
-          isOpen={true}
-          onClose={() => setSharePlayer(null)}
-          player={{
-            name: sharePlayer.name,
-            skill: sharePlayer.skill,
-            wins: sharePlayer.lifetimeWins,
-            losses: sharePlayer.lifetimeLosses,
-            gamesPlayed: sharePlayer.lifetimeGames,
-          }}
-        />
-      )}
+      {sharePlayer && (() => {
+        const rankIndex = rankedPlayers.findIndex(p => p.id === sharePlayer.id);
+        const isRanked = rankIndex !== -1;
+        return (
+          <ShareModal
+            isOpen={true}
+            onClose={() => setSharePlayer(null)}
+            player={{
+              name: sharePlayer.name,
+              skill: sharePlayer.skill,
+              wins: sharePlayer.lifetimeWins,
+              losses: sharePlayer.lifetimeLosses,
+              gamesPlayed: sharePlayer.lifetimeGames,
+            }}
+            rank={isRanked ? rankIndex + 1 : undefined}
+            totalRankedPlayers={isRanked ? rankedPlayers.length : undefined}
+            cardType="alltime"
+          />
+        );
+      })()}
     </div>
   );
 }
