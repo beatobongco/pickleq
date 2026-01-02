@@ -34,9 +34,14 @@ export function PlayScreen() {
     setMuted(newMuted);
   };
 
+  // Track mounted state to prevent announcements after unmount
+  const isMountedRef = useRef(true);
+
   // Cancel all speech when leaving the play screen
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       cancelAllSpeech();
     };
   }, []);
@@ -60,7 +65,10 @@ export function PlayScreen() {
 
         // Small delay to let UI update first
         setTimeout(() => {
-          announceNextMatch(match.court, team1Names, team2Names);
+          // Only announce if still mounted
+          if (isMountedRef.current) {
+            announceNextMatch(match.court, team1Names, team2Names);
+          }
         }, 3000);
       }
     }
