@@ -53,41 +53,35 @@ export function SetupScreen() {
               </a>
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             <button
               onClick={() => setScreen('venue-setup')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+              className={`p-2 sm:px-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 venue
                   ? 'bg-green-100 text-green-700 hover:bg-green-200'
                   : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
               }`}
+              title={venue ? 'Cloud synced' : 'Save to cloud'}
             >
-              {venue ? (
-                <>
-                  <span className="text-green-500">☁️</span>
-                  Synced
-                </>
-              ) : (
-                <>
-                  <span>💾</span>
-                  Save to Cloud
-                </>
-              )}
+              {venue ? '☁️' : '💾'}
+              <span className="hidden sm:inline">{venue ? 'Synced' : 'Cloud'}</span>
             </button>
-            <Button
-              variant="secondary"
-              size="sm"
+            <button
               onClick={() => setScreen('players')}
+              className="p-2 sm:px-3 rounded-lg text-sm font-medium bg-gray-200 hover:bg-gray-300 text-gray-800 transition-colors flex items-center gap-1.5"
+              title="Manage players"
             >
-              Players
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
+              👥
+              <span className="hidden sm:inline">Players</span>
+            </button>
+            <button
               onClick={() => setScreen('global-leaderboard')}
+              className="p-2 sm:px-3 rounded-lg text-sm font-medium bg-gray-200 hover:bg-gray-300 text-gray-800 transition-colors flex items-center gap-1.5"
+              title="Leaderboard"
             >
-              Leaderboard
-            </Button>
+              🏆
+              <span className="hidden sm:inline">Stats</span>
+            </button>
           </div>
         </div>
       </header>
