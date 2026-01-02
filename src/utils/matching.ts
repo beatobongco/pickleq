@@ -6,11 +6,20 @@ interface MatchCandidate {
   priority: number;
 }
 
-function calculatePriority(player: Player, queuePosition: number): number {
+function calculatePriority(_player: Player, queuePosition: number): number {
   // Lower number = higher priority
-  // Primary: fewer games played
-  // Secondary: earlier in queue (checked in earlier)
-  return player.gamesPlayed * 1000 + queuePosition;
+  // Pure queue position - first come, first served within the rotation
+  //
+  // This ensures:
+  // - Late arrivals go to back of queue and wait their turn
+  // - Everyone rotates fairly based on when they joined the queue
+  // - Person who arrived at hour 0 will naturally play ~2x games vs hour 1.5 arrival
+  //   because they've been through more rotation cycles
+  //
+  // Games played is NOT factored in - we trust the natural queue rotation
+  // to be fair over time. Trying to "catch up" late arrivals is unfair to
+  // people who showed up on time.
+  return queuePosition;
 }
 
 // Calculate average skill of a pair (returns null if neither has skill set)
@@ -420,7 +429,7 @@ export function findSubstitute(
 export function getPlayersWhoHaventPlayedRecently(
   players: Player[],
   _activeMatches: Match[],
-  rotationThreshold: number = 3
+  rotationThreshold: number = 2
 ): Player[] {
   // Find players who are checked in (waiting in queue)
   const checkedIn = players.filter(p => p.status === 'checked-in');
@@ -435,8 +444,15 @@ export function getPlayersWhoHaventPlayedRecently(
 
   const avgGames = activePlayers.reduce((sum, p) => sum + p.gamesPlayed, 0) / activePlayers.length;
 
+  // Find the minimum games played among checked-in players
+  const minGames = Math.min(...checkedIn.map(p => p.gamesPlayed));
+
   // Alert if a checked-in player is more than threshold games behind the average
-  return checkedIn.filter(p => avgGames - p.gamesPlayed >= rotationThreshold);
+  // AND they have the minimum games played (they're actually the most behind)
+  return checkedIn.filter(p =>
+    avgGames - p.gamesPlayed >= rotationThreshold &&
+    p.gamesPlayed === minGames
+  );
 }
 
 export function calculateLeaderboard(players: Player[]): Player[] {

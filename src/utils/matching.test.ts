@@ -58,23 +58,27 @@ describe('selectNextPlayers', () => {
       expect(result).toHaveLength(2);
     });
 
-    it('prioritizes players with fewer games played', () => {
+    it('prioritizes by queue position (respects natural turn order)', () => {
+      // Queue order matters more than games played - prevents late arrivals from jumping ahead
       const queue = [
-        createPlayer({ name: 'Veteran', gamesPlayed: 5 }),
-        createPlayer({ name: 'Newbie1', gamesPlayed: 0 }),
-        createPlayer({ name: 'Newbie2', gamesPlayed: 0 }),
-        createPlayer({ name: 'Moderate', gamesPlayed: 2 }),
-        createPlayer({ name: 'Newbie3', gamesPlayed: 1 }),
-        createPlayer({ name: 'Newbie4', gamesPlayed: 1 }),
+        createPlayer({ name: 'First', gamesPlayed: 5 }),    // First in queue
+        createPlayer({ name: 'Second', gamesPlayed: 0 }),   // Second in queue
+        createPlayer({ name: 'Third', gamesPlayed: 0 }),    // Third in queue
+        createPlayer({ name: 'Fourth', gamesPlayed: 2 }),   // Fourth in queue
+        createPlayer({ name: 'Fifth', gamesPlayed: 1 }),    // Fifth in queue
+        createPlayer({ name: 'Sixth', gamesPlayed: 1 }),    // Sixth in queue
       ];
 
       const result = selectNextPlayers(queue, 'doubles')!;
       const names = result.map(p => p.name);
 
-      // Should prioritize the 4 players with fewest games
-      expect(names).toContain('Newbie1');
-      expect(names).toContain('Newbie2');
-      expect(names).not.toContain('Veteran');
+      // Should prioritize first 4 in queue regardless of games played
+      expect(names).toContain('First');
+      expect(names).toContain('Second');
+      expect(names).toContain('Third');
+      expect(names).toContain('Fourth');
+      expect(names).not.toContain('Fifth');
+      expect(names).not.toContain('Sixth');
     });
   });
 
@@ -207,30 +211,31 @@ describe('selectNextPlayers', () => {
       expect(result).toHaveLength(4);
     });
 
-    it('prioritizes fairness over locked pairs - non-locked players with fewer games go first', () => {
-      // Locked pair has played 5 games each
+    it('respects queue position - locked pair at front plays even with more games', () => {
+      // Locked pair at front of queue has played 5 games each
       const pair1 = createPlayer({ name: 'Partner1', gamesPlayed: 5 });
       const pair2 = createPlayer({ name: 'Partner2', gamesPlayed: 5 });
       pair1.lockedPartnerId = pair2.id;
       pair2.lockedPartnerId = pair1.id;
 
-      // Non-locked players have played 0 games - they should go first
+      // Non-locked players at back of queue have 0 games
       const solo1 = createPlayer({ name: 'Solo1', gamesPlayed: 0 });
       const solo2 = createPlayer({ name: 'Solo2', gamesPlayed: 0 });
       const solo3 = createPlayer({ name: 'Solo3', gamesPlayed: 0 });
       const solo4 = createPlayer({ name: 'Solo4', gamesPlayed: 0 });
 
+      // Locked pair is first in queue, so they should play (queue position > games played)
       const queue = [pair1, pair2, solo1, solo2, solo3, solo4];
       const result = selectNextPlayers(queue, 'doubles')!;
       const names = result.map(p => p.name);
 
-      // Locked pair should NOT be included - solo players with 0 games should play
-      expect(names).not.toContain('Partner1');
-      expect(names).not.toContain('Partner2');
+      // Locked pair is in top 4 by queue position, so they play
+      expect(names).toContain('Partner1');
+      expect(names).toContain('Partner2');
+      // Plus 2 solo players who are next in queue
       expect(names).toContain('Solo1');
       expect(names).toContain('Solo2');
-      expect(names).toContain('Solo3');
-      expect(names).toContain('Solo4');
+      expect(result).toHaveLength(4);
     });
 
     it('includes locked pair when one member is in top 4 by priority', () => {
@@ -424,15 +429,15 @@ describe('findSubstitute', () => {
     expect([1, 3]).toContain(result?.skill);
   });
 
-  it('falls back to highest priority when no skill match', () => {
+  it('falls back to first in queue when no skill match', () => {
     const removed = createPlayer({ skill: null });
     const queue = [
-      createPlayer({ name: 'Veteran', gamesPlayed: 10 }),
-      createPlayer({ name: 'Newbie', gamesPlayed: 0 }),
+      createPlayer({ name: 'First', gamesPlayed: 10 }),   // First in queue
+      createPlayer({ name: 'Second', gamesPlayed: 0 }),   // Second in queue
     ];
 
     const result = findSubstitute(queue, removed);
-    expect(result?.name).toBe('Newbie'); // Fewer games = higher priority
+    expect(result?.name).toBe('First'); // Queue position > games played
   });
 });
 
