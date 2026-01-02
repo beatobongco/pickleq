@@ -4,6 +4,7 @@ import { Button } from '../components/Button';
 import { CourtCard } from '../components/CourtCard';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerPicker } from '../components/PlayerPicker';
+import { SkillSelector } from '../components/SkillSelector';
 import { UndoToast } from '../components/UndoToast';
 import { getPlayersWhoHaventPlayedRecently } from '../utils/matching';
 import { announceNextMatch, announceWinner, isMuted, setMuted, cancelAllSpeech } from '../utils/speech';
@@ -21,6 +22,7 @@ export function PlayScreen() {
     clearUndo,
     addPlayer,
     addPlayerWithSkill,
+    setPlayerSkill,
     fillCourt,
     lockPartners,
     unlockPartner,
@@ -29,6 +31,7 @@ export function PlayScreen() {
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [muted, setMutedState] = useState(isMuted);
   const [selectedForPairing, setSelectedForPairing] = useState<string | null>(null);
+  const [editingSkillPlayerId, setEditingSkillPlayerId] = useState<string | null>(null);
   const sessionPlayerNames = session.players.map(p => p.name);
 
   const toggleMute = () => {
@@ -281,11 +284,35 @@ export function PlayScreen() {
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-400">
-                        {player.skill && (
-                          <span>
-                            <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
-                            <span className="text-gray-600">{'★'.repeat(3 - player.skill)}</span>
-                          </span>
+                        {editingSkillPlayerId === player.id ? (
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <SkillSelector
+                              skill={player.skill}
+                              onChange={(skill) => {
+                                setPlayerSkill(player.id, skill);
+                                setEditingSkillPlayerId(null);
+                              }}
+                              size="sm"
+                            />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingSkillPlayerId(player.id);
+                            }}
+                            className="flex items-center gap-1 hover:bg-gray-700 px-1 py-0.5 rounded transition-colors"
+                            title="Edit skill level"
+                          >
+                            {player.skill ? (
+                              <>
+                                <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
+                                <span className="text-gray-600">{'★'.repeat(3 - player.skill)}</span>
+                              </>
+                            ) : (
+                              <span className="text-gray-500">Set skill</span>
+                            )}
+                          </button>
                         )}
                         <span>{player.gamesPlayed}G</span>
                         {winRate !== null && (

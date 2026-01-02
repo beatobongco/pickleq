@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Button } from './Button';
-import { getSkillLabel } from './SkillSelector';
+import { SkillSelector, getSkillLabel } from './SkillSelector';
 import { getSavedPlayers, type SavedPlayer } from '../utils/storage';
 import type { SkillLevel } from '../types';
 
@@ -16,6 +16,7 @@ export function PlayerPicker({
   onAddPlayerWithSkill,
 }: PlayerPickerProps) {
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerSkill, setNewPlayerSkill] = useState<SkillLevel>(null);
   const [isExpanded, setIsExpanded] = useState(true);
 
   const allSavedPlayers = useMemo(() => getSavedPlayers(), []);
@@ -47,8 +48,8 @@ export function PlayerPicker({
     return filtered.sort((a, b) => (b.lastPlayed ?? 0) - (a.lastPlayed ?? 0));
   }, [allSavedPlayers, sessionPlayerNames, newPlayerName]);
 
-  const handleAddPlayer = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddPlayer = (e?: React.FormEvent) => {
+    e?.preventDefault();
     const trimmedName = newPlayerName.trim();
     if (!trimmedName) return;
 
@@ -63,10 +64,13 @@ export function PlayerPicker({
     );
     if (savedPlayer) {
       onAddPlayerWithSkill(savedPlayer.name, savedPlayer.skill);
+    } else if (newPlayerSkill) {
+      onAddPlayerWithSkill(trimmedName, newPlayerSkill);
     } else {
       onAddPlayer(trimmedName);
     }
     setNewPlayerName('');
+    setNewPlayerSkill(null);
   };
 
   const handleSelectPlayer = (player: SavedPlayer) => {
@@ -89,18 +93,26 @@ export function PlayerPicker({
   return (
     <div className="space-y-3">
       {/* Search/Add Input */}
-      <form onSubmit={handleAddPlayer} className="flex gap-2">
-        <input
-          type="text"
-          value={newPlayerName}
-          onChange={(e) => setNewPlayerName(e.target.value)}
-          placeholder="Search or add new player..."
-          className="flex-1 px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
-        />
+      <form onSubmit={handleAddPlayer} className="space-y-2">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newPlayerName}
+            onChange={(e) => setNewPlayerName(e.target.value)}
+            placeholder="Search or add new player..."
+            className="flex-1 px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
+          />
+          {showNewPlayerOption && (
+            <Button type="submit" variant="primary" size="lg">
+              Add
+            </Button>
+          )}
+        </div>
         {showNewPlayerOption && (
-          <Button type="submit" variant="primary" size="lg">
-            Add
-          </Button>
+          <div className="flex items-center gap-2 pl-1">
+            <span className="text-sm text-gray-500">Skill:</span>
+            <SkillSelector skill={newPlayerSkill} onChange={setNewPlayerSkill} size="sm" />
+          </div>
         )}
       </form>
 
@@ -164,15 +176,17 @@ export function PlayerPicker({
       {hasSearchQuery && !isDuplicateName && availablePlayers.length === 0 && (
         <div className="text-center py-4 text-gray-500">
           <p className="text-sm">No saved players match "{newPlayerName}"</p>
-          <Button
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={handleAddPlayer}
-            className="mt-2"
-          >
-            Add "{newPlayerName.trim()}" as new player
-          </Button>
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <SkillSelector skill={newPlayerSkill} onChange={setNewPlayerSkill} size="sm" />
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={handleAddPlayer}
+            >
+              Add
+            </Button>
+          </div>
         </div>
       )}
 
