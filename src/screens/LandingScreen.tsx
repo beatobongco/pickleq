@@ -144,7 +144,7 @@ export function LandingScreen({ onGetStarted }: LandingScreenProps) {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-green-600">✓</span>
-                <span className="text-gray-700">Fair rotation (fewest games = next up)</span>
+                <span className="text-gray-700">Fair queue rotation (play, then back of line)</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-green-600">✓</span>
