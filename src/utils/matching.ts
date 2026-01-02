@@ -422,13 +422,20 @@ export function getPlayersWhoHaventPlayedRecently(
   _activeMatches: Match[],
   rotationThreshold: number = 3
 ): Player[] {
-  // Find players who are checked in but haven't played in a while
+  // Find players who are checked in (waiting in queue)
   const checkedIn = players.filter(p => p.status === 'checked-in');
 
-  // Calculate average games played
-  const avgGames = checkedIn.reduce((sum, p) => sum + p.gamesPlayed, 0) / checkedIn.length;
+  // Need at least 2 checked-in players to compare
+  if (checkedIn.length < 2) return [];
 
-  // Alert if someone is more than threshold games behind
+  // Calculate average games among ALL active players (checked-in + playing)
+  // This gives a fair baseline to compare against
+  const activePlayers = players.filter(p => p.status === 'checked-in' || p.status === 'playing');
+  if (activePlayers.length === 0) return [];
+
+  const avgGames = activePlayers.reduce((sum, p) => sum + p.gamesPlayed, 0) / activePlayers.length;
+
+  // Alert if a checked-in player is more than threshold games behind the average
   return checkedIn.filter(p => avgGames - p.gamesPlayed >= rotationThreshold);
 }
 
