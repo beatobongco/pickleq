@@ -212,15 +212,13 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         courtsPlayed: [],
         checkedInAt: isActiveSession ? Date.now() : null,
       };
-      const newState = {
+      return {
         ...state,
         session: {
           ...state.session,
           players: [...state.session.players, newPlayer],
         },
       };
-      // Try to fill courts if session is active
-      return isActiveSession ? fillAvailableCourts(newState) : newState;
     }
 
     case 'ADD_PLAYER_WITH_SKILL': {
@@ -239,15 +237,13 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         courtsPlayed: [],
         checkedInAt: isActiveSession ? Date.now() : null,
       };
-      const newState = {
+      return {
         ...state,
         session: {
           ...state.session,
           players: [...state.session.players, newPlayer],
         },
       };
-      // Try to fill courts if session is active
-      return isActiveSession ? fillAvailableCourts(newState) : newState;
     }
 
     case 'REMOVE_PLAYER':
