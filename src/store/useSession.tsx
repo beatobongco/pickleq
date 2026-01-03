@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react';
 import type { Session, Player, Match, AppScreen, SkillLevel, UndoAction, GameMode } from '../types';
-import { saveSession, loadSession, clearSession, generateId, saveLocation, updatePlayerStats, getSavedLocations } from '../utils/storage';
+import { saveSession, loadSession, clearSession, generateId, saveLocation, updatePlayerStats, getSavedLocations, getSyncedSessionId, saveSyncedSessionId } from '../utils/storage';
 import { selectNextPlayers, formTeams, createMatch, findSubstitute } from '../utils/matching';
 import { createSessionAndSync, processSyncQueue, getLocalVenue } from '../utils/supabase';
 
@@ -628,6 +628,7 @@ const SessionContext = createContext<SessionContextValue | null>(null);
 
 function getInitialState(): SessionState {
   const saved = loadSession();
+  const syncedSessionId = getSyncedSessionId();
   if (saved) {
     let screen: AppScreen = 'setup';
     if (saved.endTime) {
@@ -639,7 +640,7 @@ function getInitialState(): SessionState {
       session: saved,
       screen,
       undoAction: null,
-      syncedSessionId: null,
+      syncedSessionId,
     };
   }
   return {
@@ -657,6 +658,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     saveSession(state.session);
   }, [state.session]);
+
+  // Save syncedSessionId to localStorage on changes
+  useEffect(() => {
+    saveSyncedSessionId(state.syncedSessionId);
+  }, [state.syncedSessionId]);
 
   // Process any queued syncs on startup (for offline recovery)
   useEffect(() => {

@@ -4,6 +4,7 @@ import { saveVenueLocation, getLocalVenue, addToRoster } from './supabase';
 const STORAGE_KEY = 'dinksync_session';
 const LOCATIONS_KEY = 'dinksync_locations';
 const PLAYERS_KEY = 'dinksync_players';
+const SYNCED_SESSION_ID_KEY = 'dinksync_synced_session_id';
 
 export interface SavedLocation {
   name: string;
@@ -31,6 +32,19 @@ export function loadSession(): Session | null {
 
 export function clearSession(): void {
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(SYNCED_SESSION_ID_KEY);
+}
+
+export function getSyncedSessionId(): string | null {
+  return localStorage.getItem(SYNCED_SESSION_ID_KEY);
+}
+
+export function saveSyncedSessionId(sessionId: string | null): void {
+  if (sessionId) {
+    localStorage.setItem(SYNCED_SESSION_ID_KEY, sessionId);
+  } else {
+    localStorage.removeItem(SYNCED_SESSION_ID_KEY);
+  }
 }
 
 export function getSavedLocations(): SavedLocation[] {
