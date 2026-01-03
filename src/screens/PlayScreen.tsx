@@ -25,12 +25,14 @@ export function PlayScreen() {
     fillCourt,
     lockPartners,
     unlockPartner,
+    pullFromCourt,
   } = useSession();
 
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [muted, setMutedState] = useState(isMuted);
   const [selectedForPairing, setSelectedForPairing] = useState<string | null>(null);
   const [editingSkillPlayerId, setEditingSkillPlayerId] = useState<string | null>(null);
+  const [pullConfirm, setPullConfirm] = useState<{ playerId: string; matchId: string; playerName: string; court: number } | null>(null);
   const sessionPlayerNames = session.players.map(p => p.name);
 
   const toggleMute = () => {
@@ -113,6 +115,14 @@ export function PlayScreen() {
     return session.activeMatches.find(m => m.court === court);
   };
 
+  const handlePullPlayer = (playerId: string, matchId: string) => {
+    const player = session.players.find(p => p.id === playerId);
+    const match = session.activeMatches.find(m => m.id === matchId);
+    if (player && match) {
+      setPullConfirm({ playerId, matchId, playerName: player.name, court: match.court });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header - scoreboard style */}
@@ -181,6 +191,7 @@ export function PlayScreen() {
                 queueLength={queue.length}
                 onRecordWinner={handleRecordWinner}
                 onStartNextMatch={fillCourt}
+                onPullPlayer={handlePullPlayer}
               />
             ))}
           </div>
@@ -453,6 +464,44 @@ export function PlayScreen() {
                 className="flex-1"
               >
                 End Session
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pull Player Confirmation */}
+      {pullConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Remove from Court {pullConfirm.court}?
+            </h3>
+            <p className="text-gray-600 mb-6">
+              <strong>{pullConfirm.playerName}</strong> will return to the queue.
+              {queue.length > 0
+                ? ' A substitute will take their spot.'
+                : ' The match will be cancelled since no substitutes are available.'}
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => setPullConfirm(null)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                size="lg"
+                onClick={() => {
+                  pullFromCourt(pullConfirm.playerId, pullConfirm.matchId);
+                  setPullConfirm(null);
+                }}
+                className="flex-1"
+              >
+                Remove
               </Button>
             </div>
           </div>

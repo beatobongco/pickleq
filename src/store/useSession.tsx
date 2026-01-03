@@ -37,7 +37,8 @@ export type SessionAction =
   | { type: 'FILL_COURT'; court: number }
   | { type: 'SET_SYNCED_SESSION_ID'; sessionId: string | null }
   | { type: 'LOCK_PARTNERS'; player1Id: string; player2Id: string }
-  | { type: 'UNLOCK_PARTNER'; playerId: string };
+  | { type: 'UNLOCK_PARTNER'; playerId: string }
+  | { type: 'PULL_FROM_COURT'; playerId: string; matchId: string };
 
 // Exported for testing
 export function createInitialSession(): Session {
@@ -584,6 +585,81 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       };
     }
 
+    case 'PULL_FROM_COURT': {
+      // Pull a player from court (they want to rest/pass) - they go back to queue
+      const match = state.session.activeMatches.find(m => m.id === action.matchId);
+      if (!match) return state;
+
+      const pulledPlayer = state.session.players.find(p => p.id === action.playerId);
+      if (!pulledPlayer) return state;
+
+      const queue = getCheckedInQueue(state.session.players);
+      const substitute = findSubstitute(queue, pulledPlayer);
+      const now = Date.now();
+
+      if (!substitute) {
+        // No substitute available - cancel match, all players return to queue
+        const matchPlayerIds = [...match.team1, ...match.team2];
+        return {
+          ...state,
+          session: {
+            ...state.session,
+            players: state.session.players.map(p => {
+              if (matchPlayerIds.includes(p.id)) {
+                return { ...p, status: 'checked-in', checkedInAt: now };
+              }
+              return p;
+            }),
+            activeMatches: state.session.activeMatches.filter(m => m.id !== action.matchId),
+          },
+        };
+      }
+
+      // Substitute found - swap them in, pulled player goes to back of queue
+      const isTeam1 = match.team1.includes(action.playerId);
+      const newTeam1 = isTeam1
+        ? match.team1.map(id => id === action.playerId ? substitute.id : id)
+        : match.team1;
+      const newTeam2 = !isTeam1
+        ? match.team2.map(id => id === action.playerId ? substitute.id : id)
+        : match.team2;
+
+      // For doubles, find partner; for singles, no partner
+      const partnerId = state.session.gameMode === 'doubles'
+        ? (isTeam1
+            ? newTeam1.find(id => id !== substitute.id)
+            : newTeam2.find(id => id !== substitute.id)) ?? null
+        : null;
+
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          players: state.session.players.map(p => {
+            if (p.id === action.playerId) {
+              // Pulled player goes back to queue
+              return { ...p, status: 'checked-in', checkedInAt: now };
+            }
+            if (p.id === substitute.id) {
+              // Substitute takes their spot
+              return {
+                ...p,
+                status: 'playing',
+                lastPartner: partnerId,
+                courtsPlayed: [...p.courtsPlayed, match.court],
+              };
+            }
+            return p;
+          }),
+          activeMatches: state.session.activeMatches.map(m =>
+            m.id === action.matchId
+              ? { ...m, team1: newTeam1, team2: newTeam2 }
+              : m
+          ),
+        },
+      };
+    }
+
     case 'SET_SYNCED_SESSION_ID':
       return { ...state, syncedSessionId: action.sessionId };
 
@@ -622,6 +698,7 @@ interface SessionContextValue {
   fillCourt: (court: number) => void;
   lockPartners: (player1Id: string, player2Id: string) => void;
   unlockPartner: (playerId: string) => void;
+  pullFromCourt: (playerId: string, matchId: string) => void;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -766,6 +843,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'LOCK_PARTNERS', player1Id, player2Id }), []),
     unlockPartner: useCallback((playerId: string) =>
       dispatch({ type: 'UNLOCK_PARTNER', playerId }), []),
+    pullFromCourt: useCallback((playerId: string, matchId: string) =>
+      dispatch({ type: 'PULL_FROM_COURT', playerId, matchId }), []),
   };
 
   return (

@@ -12,6 +12,7 @@ interface CourtCardProps {
   queueLength: number;
   onRecordWinner: (matchId: string, winner: 1 | 2) => void;
   onStartNextMatch: (court: number) => void;
+  onPullPlayer?: (playerId: string, matchId: string) => void;
 }
 
 function ElapsedTime({ startTime }: { startTime: number }) {
@@ -33,11 +34,15 @@ function TeamDisplay({
   players,
   team,
   isSingles,
+  matchId,
+  onPullPlayer,
 }: {
   playerIds: string[];
   players: Player[];
   team: 1 | 2;
   isSingles: boolean;
+  matchId?: string;
+  onPullPlayer?: (playerId: string, matchId: string) => void;
 }) {
   const teamPlayers = playerIds.map(id => players.find(p => p.id === id)).filter(Boolean) as Player[];
   const bgColor = team === 1 ? 'bg-[#1976D2]' : 'bg-[#F57C00]';
@@ -60,18 +65,32 @@ function TeamDisplay({
         {teamPlayers.map(player => (
           <div
             key={player.id}
-            className="px-2 py-1.5"
+            className="px-2 py-1.5 flex items-start justify-between gap-1"
           >
-            <div className="font-semibold text-gray-900 truncate flex items-center gap-1">
-              {player.name}
-              {isLockedPair && <span className="text-purple-500 text-sm">🔗</span>}
-            </div>
-            {player.skill && (
-              <div className="text-xs text-gray-500">
-                <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
-                <span className="text-gray-300">{'★'.repeat(3 - player.skill)}</span>
-                <span className="ml-1">{getSkillLabel(player.skill)}</span>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-gray-900 truncate flex items-center gap-1">
+                {player.name}
+                {isLockedPair && <span className="text-purple-500 text-sm">🔗</span>}
               </div>
+              {player.skill && (
+                <div className="text-xs text-gray-500">
+                  <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
+                  <span className="text-gray-300">{'★'.repeat(3 - player.skill)}</span>
+                  <span className="ml-1">{getSkillLabel(player.skill)}</span>
+                </div>
+              )}
+            </div>
+            {onPullPlayer && matchId && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPullPlayer(player.id, matchId);
+                }}
+                className="text-gray-300 hover:text-red-500 p-1 -mr-1 transition-colors"
+                title="Remove from court"
+              >
+                ✕
+              </button>
             )}
           </div>
         ))}
@@ -88,6 +107,7 @@ export function CourtCard({
   queueLength,
   onRecordWinner,
   onStartNextMatch,
+  onPullPlayer,
 }: CourtCardProps) {
   const isSingles = gameMode === 'singles';
   const playersNeeded = isSingles ? 2 : 4;
@@ -164,6 +184,8 @@ export function CourtCard({
             players={players}
             team={1}
             isSingles={isSingles}
+            matchId={match.id}
+            onPullPlayer={onPullPlayer}
           />
           <div className="flex items-center">
             <span className="text-xl font-bold text-gray-400">vs</span>
@@ -173,6 +195,8 @@ export function CourtCard({
             players={players}
             team={2}
             isSingles={isSingles}
+            matchId={match.id}
+            onPullPlayer={onPullPlayer}
           />
         </div>
 
