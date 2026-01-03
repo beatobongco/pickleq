@@ -34,6 +34,7 @@ function createPlayer(overrides: Partial<Player> = {}): Player {
     lockedPartnerId: null,
     courtsPlayed: [],
     checkedInAt: Date.now(),
+    lastMatchId: null,
     ...overrides,
   };
 }
