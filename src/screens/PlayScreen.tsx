@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
 import { CourtCard } from '../components/CourtCard';
@@ -7,6 +7,13 @@ import { PlayerPicker } from '../components/PlayerPicker';
 import { SkillSelector } from '../components/SkillSelector';
 import { UndoToast } from '../components/UndoToast';
 import { announceNextMatch, announceWinner, isMuted, setMuted, cancelAllSpeech } from '../utils/speech';
+
+function formatDuration(ms: number): string {
+  const totalSeconds = Math.round(ms / 1000);
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
 
 export function PlayScreen() {
   const {
@@ -83,6 +90,29 @@ export function PlayScreen() {
 
   const notHerePlayers = session.players.filter(p => p.status === 'not-here');
   const leftPlayers = session.players.filter(p => p.status === 'left');
+
+  // Calculate average game duration from completed matches
+  const gameStats = useMemo(() => {
+    const completedMatches = session.matches.filter(m => m.endTime && m.startTime);
+    if (completedMatches.length === 0) {
+      return { avgDuration: null, estimatedWait: null };
+    }
+
+    const totalDuration = completedMatches.reduce((sum, m) => {
+      return sum + ((m.endTime ?? 0) - m.startTime);
+    }, 0);
+    const avgDuration = totalDuration / completedMatches.length;
+
+    // Estimate wait time based on queue position
+    // Players per game depends on mode
+    const playersPerGame = session.gameMode === 'doubles' ? 4 : 2;
+    // How many "rounds" until you play? Assume all courts rotate together
+    const activeCourts = session.activeMatches.length || 1;
+    const gamesPerRound = activeCourts;
+    const playersServedPerRound = gamesPerRound * playersPerGame;
+
+    return { avgDuration, playersServedPerRound };
+  }, [session.matches, session.activeMatches.length, session.gameMode]);
 
   // Generate court grid
   const courts = Array.from({ length: session.courts }, (_, i) => i + 1);
@@ -213,6 +243,11 @@ export function PlayScreen() {
                   Cancel
                 </button>
               )}
+              {gameStats.avgDuration && (
+                <span className="text-gray-500 text-xs" title="Average game duration this session">
+                  Avg game: {formatDuration(gameStats.avgDuration)}
+                </span>
+              )}
               {(() => {
                 const playersNeeded = session.gameMode === 'doubles' ? 4 : 2;
                 const playersShort = playersNeeded - queue.length;
@@ -313,6 +348,17 @@ export function PlayScreen() {
                             {winRate}%
                           </span>
                         )}
+                        {gameStats.avgDuration && gameStats.playersServedPerRound && (() => {
+                          // Which "round" will this player play in? (1-indexed)
+                          const round = Math.ceil((index + 1) / gameStats.playersServedPerRound);
+                          // Round 1 waits for current games, round 2 waits for round 1, etc.
+                          const waitMins = Math.max(1, Math.ceil(round * (gameStats.avgDuration / 60000)));
+                          return (
+                            <span className="text-gray-500">
+                              • ~{waitMins} min wait
+                            </span>
+                          );
+                        })()}
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
