@@ -72,13 +72,17 @@ function TeamDisplay({
                 {player.name}
                 {isLockedPair && <span className="text-purple-500 text-sm">🔗</span>}
               </div>
-              {player.skill && (
-                <div className="text-xs text-gray-500">
-                  <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
-                  <span className="text-gray-300">{'★'.repeat(3 - player.skill)}</span>
-                  <span className="ml-1">{getSkillLabel(player.skill)}</span>
-                </div>
-              )}
+              <div className="text-xs text-gray-500">
+                {player.skill ? (
+                  <>
+                    <span className="text-yellow-500">{'★'.repeat(player.skill)}</span>
+                    <span className="text-gray-300">{'★'.repeat(3 - player.skill)}</span>
+                    <span className="ml-1 hidden sm:inline">{getSkillLabel(player.skill)}</span>
+                  </>
+                ) : (
+                  <span className="text-gray-300">★★★</span>
+                )}
+              </div>
             </div>
             {onPullPlayer && matchId && (
               <button
