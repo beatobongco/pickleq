@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How to Use PickleQ - Simple Guide</title>
+  <title>PickleQ User Guide - Complete Guide for Staff & Players</title>
+  <meta name="description" content="Complete guide to using PickleQ for managing pickleball open play sessions. Learn setup, player management, court assignments, and more.">
   <style>
     * {
       margin: 0;
@@ -18,7 +19,7 @@
       min-height: 100vh;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -39,94 +40,251 @@
       font-size: 1.2rem;
       color: #666;
     }
-    .step {
+
+    /* Table of Contents */
+    .toc {
       background: white;
       border-radius: 16px;
       padding: 24px;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
-    .step-number {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      background: #16a34a;
-      color: white;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border-radius: 50%;
-      margin-right: 12px;
-    }
-    .step h2 {
-      display: inline;
-      font-size: 1.4rem;
-      color: #333;
-      vertical-align: middle;
-    }
-    .step-content {
-      margin-top: 16px;
-      padding-left: 52px;
-    }
-    .step-content p {
-      margin-bottom: 12px;
-      font-size: 1.1rem;
-    }
-    .tip {
-      background: #fef3c7;
-      border-left: 4px solid #f59e0b;
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      margin-top: 12px;
-    }
-    .tip strong {
-      color: #92400e;
-    }
-    .action-box {
-      background: #f0fdf4;
-      border: 2px solid #16a34a;
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 12px;
-    }
-    .action-box strong {
+    .toc h2 {
       color: #16a34a;
+      margin-bottom: 16px;
+      font-size: 1.4rem;
     }
-    .emoji {
-      font-size: 1.5rem;
-      margin-right: 8px;
+    .toc-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
     }
-    section {
-      margin-bottom: 40px;
+    .toc-section h3 {
+      color: #374151;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e5e7eb;
     }
-    section > h2 {
+    .toc ul {
+      list-style: none;
+    }
+    .toc li {
+      margin-bottom: 6px;
+    }
+    .toc a {
+      color: #16a34a;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    /* Section Styles */
+    .section {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .section h2 {
       font-size: 1.8rem;
       color: #16a34a;
       margin-bottom: 20px;
       padding-bottom: 10px;
       border-bottom: 2px solid #dcfce7;
     }
-    .faq {
-      background: white;
+    .section h3 {
+      font-size: 1.3rem;
+      color: #374151;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    .section h4 {
+      font-size: 1.1rem;
+      color: #4b5563;
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+    .section p {
+      margin-bottom: 12px;
+      font-size: 1.05rem;
+    }
+    .section ul, .section ol {
+      margin-left: 24px;
+      margin-bottom: 16px;
+    }
+    .section li {
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+    }
+
+    /* Step Cards */
+    .step {
+      background: #f9fafb;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 16px;
+      border-left: 4px solid #16a34a;
     }
-    .faq h3 {
-      color: #16a34a;
+    .step-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: #16a34a;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 50%;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .step-header h4 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: #333;
+    }
+
+    /* Tip, Warning, Note Boxes */
+    .tip {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .tip strong {
+      color: #92400e;
+    }
+    .note {
+      background: #dbeafe;
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .note strong {
+      color: #1e40af;
+    }
+    .warning {
+      background: #fee2e2;
+      border-left: 4px solid #ef4444;
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .warning strong {
+      color: #991b1b;
+    }
+    .success {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .success strong {
+      color: #065f46;
+    }
+
+    /* Feature Grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .feature-card {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .feature-card .icon {
+      font-size: 2rem;
       margin-bottom: 8px;
     }
-    footer {
-      text-align: center;
-      padding: 40px 20px;
-      color: #666;
-    }
-    footer a {
+    .feature-card h4 {
       color: #16a34a;
-      text-decoration: none;
+      margin-bottom: 4px;
+      margin-top: 0;
+    }
+    .feature-card p {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0;
+    }
+
+    /* Skill Stars */
+    .skill-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    .skill-table th, .skill-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .skill-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #374151;
+    }
+    .skill-table .stars {
+      color: #eab308;
+      font-size: 1.2rem;
+    }
+
+    /* FAQ */
+    .faq-item {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 16px 0;
+    }
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+    .faq-item h4 {
+      color: #16a34a;
+      margin-bottom: 8px;
+      margin-top: 0;
+    }
+    .faq-item p {
+      margin: 0;
+      color: #4b5563;
+    }
+
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    .comparison-table th, .comparison-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border: 1px solid #e5e7eb;
+    }
+    .comparison-table th {
+      background: #16a34a;
+      color: white;
       font-weight: 600;
     }
+    .comparison-table tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    /* Button */
     .button {
       display: inline-block;
       background: #16a34a;
@@ -141,13 +299,53 @@
     .button:hover {
       background: #15803d;
     }
+    .button-secondary {
+      background: white;
+      color: #16a34a;
+      border: 2px solid #16a34a;
+    }
+    .button-secondary:hover {
+      background: #f0fdf4;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+    footer a {
+      color: #16a34a;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Back to Top */
+    .back-to-top {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .back-to-top a {
+      color: #16a34a;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
     @media (max-width: 600px) {
       header h1 {
         font-size: 2rem;
       }
-      .step-content {
-        padding-left: 0;
-        margin-top: 12px;
+      .section {
+        padding: 20px;
+      }
+      .section h2 {
+        font-size: 1.5rem;
+      }
+      .toc-columns {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -156,245 +354,914 @@
   <div class="container">
     <header>
       <div style="font-size: 4rem; margin-bottom: 10px;">🏓</div>
-      <h1>How to Use PickleQ</h1>
-      <p>A simple guide for running open play sessions</p>
+      <h1>PickleQ User Guide</h1>
+      <p>The complete guide for staff and players</p>
+      <p style="font-size: 0.9rem; color: #888; margin-top: 10px;">Version 1.0</p>
     </header>
 
-    <!-- WHAT IS IT -->
-    <section>
-      <h2>What is PickleQ?</h2>
-      <div class="step">
-        <p style="font-size: 1.2rem;">
-          <span class="emoji">✨</span>
-          PickleQ helps you run <strong>fair pickleball open play</strong> at your court.
-        </p>
-        <ul style="margin-top: 16px; margin-left: 20px; font-size: 1.1rem;">
-          <li style="margin-bottom: 8px;">Players check in when they arrive</li>
-          <li style="margin-bottom: 8px;">The app picks who plays next (fairly!)</li>
-          <li style="margin-bottom: 8px;">You tap who won each game</li>
-          <li style="margin-bottom: 8px;">Everyone sees their stats at the end</li>
-        </ul>
+    <!-- Table of Contents -->
+    <nav class="toc" id="top">
+      <h2>Table of Contents</h2>
+      <div class="toc-columns">
+        <div class="toc-section">
+          <h3>Getting Started</h3>
+          <ul>
+            <li><a href="#what-is-pickleq">What is PickleQ?</a></li>
+            <li><a href="#key-features">Key Features</a></li>
+            <li><a href="#who-uses">Who Uses PickleQ?</a></li>
+          </ul>
+        </div>
+        <div class="toc-section">
+          <h3>For Staff</h3>
+          <ul>
+            <li><a href="#first-time-setup">First-Time Setup</a></li>
+            <li><a href="#running-session">Running a Session</a></li>
+            <li><a href="#during-play">During Play</a></li>
+            <li><a href="#ending-session">Ending a Session</a></li>
+          </ul>
+        </div>
+        <div class="toc-section">
+          <h3>Features</h3>
+          <ul>
+            <li><a href="#skill-levels">Skill Levels</a></li>
+            <li><a href="#lock-partners">Locking Partners</a></li>
+            <li><a href="#voice-announcements">Voice Announcements</a></li>
+            <li><a href="#singles-mode">Singles Mode</a></li>
+          </ul>
+        </div>
+        <div class="toc-section">
+          <h3>For Players</h3>
+          <ul>
+            <li><a href="#player-guide">Player Guide</a></li>
+            <li><a href="#viewing-stats">Viewing Your Stats</a></li>
+            <li><a href="#sharing-stats">Sharing Stats</a></li>
+            <li><a href="#leaderboards">Leaderboards</a></li>
+          </ul>
+        </div>
+        <div class="toc-section">
+          <h3>Advanced</h3>
+          <ul>
+            <li><a href="#venue-setup">Cloud & Venue Setup</a></li>
+            <li><a href="#offline-mode">Offline Mode</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
       </div>
+    </nav>
+
+    <!-- WHAT IS PICKLEQ -->
+    <section class="section" id="what-is-pickleq">
+      <h2>What is PickleQ?</h2>
+      <p>PickleQ is a free, easy-to-use web app that helps you manage pickleball open play sessions. Whether you're running a busy recreation center or organizing a casual weekend game, PickleQ handles all the logistics so everyone can focus on playing.</p>
+
+      <h3>How It Works</h3>
+      <ol>
+        <li><strong>Players check in</strong> when they arrive at the court</li>
+        <li><strong>PickleQ assigns courts</strong> automatically based on skill level</li>
+        <li><strong>Staff records winners</strong> after each game</li>
+        <li><strong>Players rotate fairly</strong> - play a game, then back to the queue</li>
+        <li><strong>Everyone sees stats</strong> at the end of the session</li>
+      </ol>
+
+      <div class="success">
+        <strong>No app download required!</strong> PickleQ works in any web browser on phones, tablets, or computers. Just go to pickleq.app and you're ready to play.
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
     </section>
 
-    <!-- BEFORE YOU START -->
-    <section>
-      <h2>Before You Start</h2>
-      <div class="step">
-        <span class="step-number">1</span>
-        <h2>Open the App</h2>
-        <div class="step-content">
-          <p>Go to <strong>pickleq.app</strong> on your tablet or phone.</p>
-          <p>Works best on a tablet at the front desk!</p>
+    <!-- KEY FEATURES -->
+    <section class="section" id="key-features">
+      <h2>Key Features</h2>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon">⚖️</div>
+          <h4>Fair Rotation</h4>
+          <p>First in, first out queue system</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⭐</div>
+          <h4>Skill Matching</h4>
+          <p>Balanced teams for better games</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📊</div>
+          <h4>Stats Tracking</h4>
+          <p>Wins, losses, and rankings</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔗</div>
+          <h4>Lock Partners</h4>
+          <p>Keep couples together</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔊</div>
+          <h4>Voice Announce</h4>
+          <p>Calls out matches audibly</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📱</div>
+          <h4>Share Stats</h4>
+          <p>Beautiful cards for social media</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📶</div>
+          <h4>Works Offline</h4>
+          <p>No internet? No problem</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🏆</div>
+          <h4>Leaderboards</h4>
+          <p>Track all-time rankings</p>
         </div>
       </div>
 
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- WHO USES PICKLEQ -->
+    <section class="section" id="who-uses">
+      <h2>Who Uses PickleQ?</h2>
+
+      <table class="comparison-table">
+        <tr>
+          <th>User Type</th>
+          <th>What They Do</th>
+        </tr>
+        <tr>
+          <td><strong>Staff / Coordinators</strong></td>
+          <td>Set up sessions, add players, manage courts, record winners, and share stats</td>
+        </tr>
+        <tr>
+          <td><strong>Players</strong></td>
+          <td>Check in, play games, view stats, and share achievements</td>
+        </tr>
+        <tr>
+          <td><strong>Venue Managers</strong></td>
+          <td>Set up cloud sync, configure venue settings, access all-time leaderboards</td>
+        </tr>
+      </table>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- FIRST TIME SETUP -->
+    <section class="section" id="first-time-setup">
+      <h2>First-Time Setup (Staff)</h2>
+      <p>Getting started takes less than a minute. No account required!</p>
+
       <div class="step">
-        <span class="step-number">2</span>
-        <h2>Set Up Your Venue (One Time Only)</h2>
-        <div class="step-content">
-          <p>Tap the <strong>gear icon</strong> in the top corner.</p>
-          <p>Enter your venue name (like "Manila Pickleball Club").</p>
-          <p>This lets players see their stats online later!</p>
-          <div class="tip">
-            <strong>Tip:</strong> You only need to do this once. The app remembers it.
-          </div>
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>Open PickleQ</h4>
         </div>
+        <p>Go to <strong>pickleq.app</strong> on your tablet, phone, or computer. For best results, use a tablet at the front desk where players can see it.</p>
       </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>Tap "Get Started"</h4>
+        </div>
+        <p>On the landing page, tap the green "Get Started" button. You'll go straight to the setup screen.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h4>Enter Your Location</h4>
+        </div>
+        <p>Type where you're playing (e.g., "Courts A-D" or "Recreation Center"). This will be saved for next time!</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">4</span>
+          <h4>Set Number of Courts</h4>
+        </div>
+        <p>Use the + and - buttons to set how many courts you have available (1-10).</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">5</span>
+          <h4>Choose Game Mode</h4>
+        </div>
+        <p>Select <strong>Doubles</strong> (4 players per court, default) or <strong>Singles</strong> (2 players per court).</p>
+      </div>
+
+      <div class="tip">
+        <strong>Pro Tip:</strong> Your settings are saved automatically. Next time you open PickleQ, your location and court count will be pre-filled!
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
     </section>
 
     <!-- RUNNING A SESSION -->
-    <section>
+    <section class="section" id="running-session">
       <h2>Running a Session</h2>
 
+      <h3>Adding Players</h3>
       <div class="step">
-        <span class="step-number">1</span>
-        <h2>Set Up the Session</h2>
-        <div class="step-content">
-          <p>Pick where you're playing (like "Courts A-D").</p>
-          <p>Set how many courts you have.</p>
-          <div class="action-box">
-            <strong>You need at least 4 players to start!</strong>
-          </div>
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>Type the Player's Name</h4>
         </div>
+        <p>In the "Add player" box, type the player's name. If they've played before, their name will auto-complete.</p>
       </div>
 
       <div class="step">
-        <span class="step-number">2</span>
-        <h2>Add Players</h2>
-        <div class="step-content">
-          <p>Type each player's name and tap <strong>Add</strong>.</p>
-          <p>You can also pick their skill level (stars):</p>
-          <ul style="margin-left: 20px; margin-top: 8px;">
-            <li><span style="color: #eab308;">★</span> = Beginner</li>
-            <li><span style="color: #eab308;">★★</span> = Intermediate</li>
-            <li><span style="color: #eab308;">★★★</span> = Advanced</li>
-          </ul>
-          <div class="tip">
-            <strong>Tip:</strong> Skill levels help make fair teams!
-          </div>
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>Set Their Skill Level (Optional)</h4>
         </div>
+        <p>Tap the stars to set their skill level. This helps create balanced teams. See the <a href="#skill-levels">Skill Levels</a> section for details.</p>
       </div>
 
       <div class="step">
-        <span class="step-number">3</span>
-        <h2>Check Players In</h2>
-        <div class="step-content">
-          <p>Tap a player's name to <strong>check them in</strong>.</p>
-          <p>Only checked-in players will be put on courts.</p>
-          <p>Players can check out if they need a break!</p>
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h4>Tap "Add"</h4>
         </div>
+        <p>The player appears in the "Not Here Yet" section. They're saved to your roster for future sessions.</p>
+      </div>
+
+      <h3>Checking Players In</h3>
+      <p>When a player arrives at the court:</p>
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>Find Their Name</h4>
+        </div>
+        <p>Look for the player in the "Not Here Yet" section, or use the search box.</p>
       </div>
 
       <div class="step">
-        <span class="step-number">4</span>
-        <h2>Start Playing!</h2>
-        <div class="step-content">
-          <p>Tap the big green <strong>Start Session</strong> button.</p>
-          <p>The app will automatically put 4 players on each court.</p>
-          <div class="action-box">
-            <strong>Players rotate fairly:</strong> play a game, then go to the back of the line!
-          </div>
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>Tap "Check In"</h4>
         </div>
+        <p>The player moves to the "Checked In" section and joins the queue. The earlier they check in, the sooner they'll play!</p>
+      </div>
+
+      <h3>Starting the Session</h3>
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>Wait for Enough Players</h4>
+        </div>
+        <p>You need at least <strong>4 checked-in players for doubles</strong> (or 2 for singles).</p>
       </div>
 
       <div class="step">
-        <span class="step-number">5</span>
-        <h2>Record Winners</h2>
-        <div class="step-content">
-          <p>When a game ends, find that court on screen.</p>
-          <p>Tap the <strong>winning team</strong> (Blue or Orange side).</p>
-          <p>Those 4 players go back in line, and 4 new players get on court!</p>
-          <div class="tip">
-            <strong>Made a mistake?</strong> A popup appears for 10 seconds to undo.
-          </div>
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>Tap "Start Session"</h4>
         </div>
+        <p>The green "Start Session" button becomes active when you have enough players. Tap it!</p>
       </div>
 
       <div class="step">
-        <span class="step-number">6</span>
-        <h2>End the Session</h2>
-        <div class="step-content">
-          <p>When you're done, tap <strong>End Session</strong>.</p>
-          <p>You'll see the final leaderboard with everyone's stats!</p>
-          <p>The top 3 players get medals: 🥇 🥈 🥉</p>
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h4>Courts Fill Automatically</h4>
         </div>
+        <p>PickleQ automatically assigns balanced teams to all available courts. Remaining players go to the queue.</p>
       </div>
+
+      <div class="note">
+        <strong>Note:</strong> You can still add and check in players after the session starts. Late arrivals will join the back of the queue.
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- DURING PLAY -->
+    <section class="section" id="during-play">
+      <h2>During Play</h2>
+
+      <h3>Understanding the Play Screen</h3>
+      <p>The play screen shows three main areas:</p>
+      <ul>
+        <li><strong>Header:</strong> Location name, total games played, mute button</li>
+        <li><strong>Courts:</strong> Active matches with team assignments</li>
+        <li><strong>Queue:</strong> Players waiting for their next game (with estimated wait times)</li>
+      </ul>
+
+      <h3>Recording Winners</h3>
+      <p>When a game ends on any court:</p>
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>Find the Court</h4>
+        </div>
+        <p>Locate the court card showing the completed match.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>Tap the Winning Team</h4>
+        </div>
+        <p>Tap the <strong>Team 1</strong> (left/top) or <strong>Team 2</strong> (right/bottom) button for the winners.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h4>Players Rotate</h4>
+        </div>
+        <p>All 4 players return to the back of the queue. Stats are updated. New players get assigned to the court.</p>
+      </div>
+
+      <div class="tip">
+        <strong>Made a mistake?</strong> An "Undo" popup appears for 10 seconds after recording a winner. Tap it to reverse the result!
+      </div>
+
+      <h3>Managing the Queue</h3>
+      <p>The queue shows who's playing next:</p>
+      <ul>
+        <li><strong>Queue position:</strong> Players are ordered by check-in time (first in, first out)</li>
+        <li><strong>Wait time:</strong> Estimated wait based on average game duration</li>
+        <li><strong>"Next Up" indicator:</strong> Shows the next 4-8 players in line</li>
+      </ul>
+
+      <h3>Handling Special Situations</h3>
+
+      <h4>Player Needs a Break</h4>
+      <p>Tap the player's name and select "Check Out." They'll be removed from the queue but can check back in later.</p>
+
+      <h4>Player Leaves Mid-Game</h4>
+      <p>Tap the player on the court and select "Pull from Court." PickleQ will find a substitute from the queue.</p>
+
+      <h4>Late Arrival</h4>
+      <p>Just add and check in the new player. They'll join the back of the queue.</p>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- ENDING A SESSION -->
+    <section class="section" id="ending-session">
+      <h2>Ending a Session</h2>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>Tap "End Session"</h4>
+        </div>
+        <p>When you're done for the day, tap the "End Session" button in the header.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>View the Leaderboard</h4>
+        </div>
+        <p>The session leaderboard appears, showing all players ranked by wins. Top 3 get medals!</p>
+        <ul>
+          <li>🥇 Gold - Most wins</li>
+          <li>🥈 Silver - Second place</li>
+          <li>🥉 Bronze - Third place</li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h4>Share Stats (Optional)</h4>
+        </div>
+        <p>Tap any player's name to generate a shareable stats card. Players can download it or share to social media!</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">4</span>
+          <h4>Start a New Session</h4>
+        </div>
+        <p>Tap "New Session" to begin another session. All players and settings are preserved.</p>
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- SKILL LEVELS -->
+    <section class="section" id="skill-levels">
+      <h2>Skill Levels</h2>
+      <p>Skill levels help PickleQ create balanced teams. When possible, it pairs a stronger player with a newer player on each team, so games are competitive and fun for everyone.</p>
+
+      <table class="skill-table">
+        <tr>
+          <th>Level</th>
+          <th>Stars</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td><strong>Beginner</strong></td>
+          <td><span class="stars">★</span></td>
+          <td>New to pickleball, still learning basic rules and strokes</td>
+        </tr>
+        <tr>
+          <td><strong>Intermediate</strong></td>
+          <td><span class="stars">★★</span></td>
+          <td>Knows the game well, consistent play, developing strategy</td>
+        </tr>
+        <tr>
+          <td><strong>Advanced</strong></td>
+          <td><span class="stars">★★★</span></td>
+          <td>Highly skilled, strong strategy, competitive player</td>
+        </tr>
+        <tr>
+          <td><strong>Unrated</strong></td>
+          <td><span class="stars" style="color: #ccc;">☆☆☆</span></td>
+          <td>No skill level set (treated as average)</td>
+        </tr>
+      </table>
+
+      <h3>Setting Skill Levels</h3>
+      <ul>
+        <li><strong>When adding a player:</strong> Tap the stars before tapping "Add"</li>
+        <li><strong>For existing players:</strong> Tap the player's name, then "Edit" to change their skill</li>
+        <li><strong>Don't know?</strong> Leave it blank - the player will be treated as average skill</li>
+      </ul>
+
+      <div class="tip">
+        <strong>Tip:</strong> If you're unsure about a player's skill, start them at ★★ (Intermediate) and adjust after watching them play a few games.
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- LOCK PARTNERS -->
+    <section class="section" id="lock-partners">
+      <h2>Locking Partners</h2>
+      <p>The "Lock Partners" feature keeps two players on the same team for every game. Perfect for couples, parent-child pairs, or friends who want to stick together.</p>
+
+      <h3>How to Lock Partners</h3>
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>Make Sure Both Players Are Checked In</h4>
+        </div>
+        <p>Both players must be in the "Checked In" section before you can lock them.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>Tap the Lock Icon (🔗)</h4>
+        </div>
+        <p>Find the first player and tap the chain/lock icon next to their name.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h4>Select Their Partner</h4>
+        </div>
+        <p>Tap the second player's name. Both players will now show a lock indicator.</p>
+      </div>
+
+      <h3>How to Unlock Partners</h3>
+      <p>Tap the lock icon on either locked player, then tap "Unlock" to separate them.</p>
+
+      <div class="note">
+        <strong>Note:</strong> Locked partners always play together and rotate together. They'll be matched against other pairs with similar combined skill levels.
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- VOICE ANNOUNCEMENTS -->
+    <section class="section" id="voice-announcements">
+      <h2>Voice Announcements</h2>
+      <p>PickleQ can announce matches out loud using text-to-speech. This is great for busy courts where players might not be watching the screen.</p>
+
+      <h3>What Gets Announced</h3>
+      <ul>
+        <li><strong>New matches:</strong> "Court 1: Team Blue vs Team Orange"</li>
+        <li><strong>Winners:</strong> "Court 1: Team Blue wins!"</li>
+        <li><strong>Top 3 players:</strong> Announced when the session ends</li>
+      </ul>
+
+      <h3>Mute/Unmute</h3>
+      <p>Tap the speaker icon (🔊) in the header to toggle announcements on or off. Your preference is saved for future sessions.</p>
+
+      <div class="tip">
+        <strong>Tip:</strong> Connect your device to a Bluetooth speaker for announcements that everyone can hear across the courts!
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- SINGLES MODE -->
+    <section class="section" id="singles-mode">
+      <h2>Singles Mode</h2>
+      <p>Running 1-on-1 games instead of doubles? PickleQ supports that too!</p>
+
+      <h3>Setting Up Singles</h3>
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>During Setup</h4>
+        </div>
+        <p>On the setup screen, tap <strong>"Singles"</strong> instead of "Doubles".</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>Minimum Players</h4>
+        </div>
+        <p>You need at least <strong>2 players</strong> to start a singles session.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h4>Court Assignment</h4>
+        </div>
+        <p>Each court gets 2 players. Everything else works the same!</p>
+      </div>
+
+      <div class="note">
+        <strong>Note:</strong> The "Lock Partners" feature is not available in Singles mode.
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- PLAYER GUIDE -->
+    <section class="section" id="player-guide">
+      <h2>Player Guide</h2>
+      <p>Welcome to PickleQ! Here's what you need to know as a player.</p>
+
+      <h3>When You Arrive</h3>
+      <ol>
+        <li><strong>Find the staff member</strong> with the PickleQ tablet or screen</li>
+        <li><strong>Give them your name</strong> so they can check you in</li>
+        <li><strong>Wait for your turn</strong> - you'll see your position in the queue on screen</li>
+      </ol>
+
+      <h3>The Queue System</h3>
+      <p>PickleQ uses a fair queue system:</p>
+      <ul>
+        <li><strong>First come, first served:</strong> The earlier you check in, the sooner you play</li>
+        <li><strong>After each game:</strong> All players return to the back of the queue</li>
+        <li><strong>Wait times:</strong> Check the screen to see your estimated wait</li>
+      </ul>
+
+      <h3>During Your Game</h3>
+      <ul>
+        <li>Your court assignment is shown on the screen (and announced if audio is on)</li>
+        <li>Play your game with your assigned teammates and opponents</li>
+        <li>When done, tell staff who won - they'll record it in PickleQ</li>
+      </ul>
+
+      <h3>Taking a Break</h3>
+      <p>Need to rest or grab water? Ask staff to "check you out." You'll be removed from the queue temporarily. Just check back in when you're ready to play again!</p>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- VIEWING STATS -->
+    <section class="section" id="viewing-stats">
+      <h2>Viewing Your Stats</h2>
+      <p>PickleQ tracks your performance across sessions. Here's what's tracked:</p>
+
+      <table class="comparison-table">
+        <tr>
+          <th>Stat</th>
+          <th>What It Means</th>
+        </tr>
+        <tr>
+          <td><strong>Games Played</strong></td>
+          <td>Total number of games you've participated in</td>
+        </tr>
+        <tr>
+          <td><strong>Wins</strong></td>
+          <td>Number of games your team won</td>
+        </tr>
+        <tr>
+          <td><strong>Losses</strong></td>
+          <td>Number of games your team lost</td>
+        </tr>
+        <tr>
+          <td><strong>Win Rate</strong></td>
+          <td>Percentage of games won (wins divided by total games)</td>
+        </tr>
+        <tr>
+          <td><strong>Ranking</strong></td>
+          <td>Your position compared to other players</td>
+        </tr>
+      </table>
+
+      <h3>Session Stats vs. Lifetime Stats</h3>
+      <ul>
+        <li><strong>Session stats:</strong> Your performance in the current session only</li>
+        <li><strong>Lifetime stats:</strong> Your all-time record across all sessions (requires cloud sync)</li>
+      </ul>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
     </section>
 
     <!-- SHARING STATS -->
-    <section>
-      <h2>Sharing Stats with Players</h2>
+    <section class="section" id="sharing-stats">
+      <h2>Sharing Your Stats</h2>
+      <p>Show off your achievements with beautiful stats cards!</p>
+
+      <h3>How to Get Your Stats Card</h3>
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>Access the Leaderboard</h4>
+        </div>
+        <p>After the session ends, you'll see the leaderboard. Or visit the venue's public leaderboard link.</p>
+      </div>
 
       <div class="step">
-        <p style="font-size: 1.2rem; margin-bottom: 16px;">
-          <span class="emoji">📱</span>
-          After the session ends, you get a <strong>share link</strong>!
-        </p>
-        <p>Players can visit this link on their own phones to:</p>
-        <ul style="margin-left: 20px; margin-top: 12px; font-size: 1.1rem;">
-          <li style="margin-bottom: 8px;">See their session stats</li>
-          <li style="margin-bottom: 8px;">Download a stats card to post on social media</li>
-          <li style="margin-bottom: 8px;">Check the all-time leaderboard</li>
-        </ul>
-        <div class="action-box">
-          <strong>Post this link at your court!</strong> Players love sharing their wins.
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>Tap Your Name</h4>
         </div>
+        <p>Find yourself on the leaderboard and tap your name.</p>
       </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h4>View Your Stats Card</h4>
+        </div>
+        <p>A beautiful card appears showing your name, skill level, record, and ranking.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">4</span>
+          <h4>Share or Download</h4>
+        </div>
+        <ul>
+          <li><strong>Share:</strong> Tap the share button to post directly to social media, messages, or email</li>
+          <li><strong>Download:</strong> Tap download to save the card as an image to your device</li>
+        </ul>
+      </div>
+
+      <div class="tip">
+        <strong>Tip:</strong> Stats cards look great on Instagram, Facebook, and WhatsApp! Share your wins with your pickleball friends.
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
     </section>
 
-    <!-- EXTRA FEATURES -->
-    <section>
-      <h2>Extra Features</h2>
+    <!-- LEADERBOARDS -->
+    <section class="section" id="leaderboards">
+      <h2>Leaderboards</h2>
 
+      <h3>Session Leaderboard</h3>
+      <p>Shows rankings for the current session only. Displayed automatically when a session ends.</p>
+      <ul>
+        <li>Ranked by number of wins</li>
+        <li>Tiebreaker: win percentage, then games played</li>
+        <li>Top 3 get medals</li>
+      </ul>
+
+      <h3>All-Time Leaderboard</h3>
+      <p>Shows lifetime rankings across all sessions (requires venue cloud sync).</p>
+      <ul>
+        <li>Ranked by win percentage</li>
+        <li>Minimum games required to appear (set by venue)</li>
+        <li>Accessible via the venue's public link</li>
+      </ul>
+
+      <h3>Ranking Requirements</h3>
+      <p>To appear on the ranked leaderboard, players typically need a minimum number of games (default: 10). This prevents players with just 1 win from topping the charts!</p>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- VENUE SETUP -->
+    <section class="section" id="venue-setup">
+      <h2>Cloud & Venue Setup</h2>
+      <p>Setting up a venue enables cloud sync, public leaderboards, and multi-device access. This is optional but recommended for recreation centers and clubs.</p>
+
+      <h3>Creating a Venue</h3>
       <div class="step">
-        <p style="font-size: 1.2rem; margin-bottom: 16px;">
-          <span class="emoji">🔗</span>
-          <strong>Lock Partners</strong> (for couples or friends)
-        </p>
-        <p>Want two players to always play on the same team?</p>
-        <ul style="margin-left: 20px; margin-top: 12px; font-size: 1.1rem;">
-          <li style="margin-bottom: 8px;">Tap the 🔗 icon next to a checked-in player</li>
-          <li style="margin-bottom: 8px;">Then tap their partner to link them</li>
-          <li style="margin-bottom: 8px;">They'll always be teammates until you unlink them</li>
-        </ul>
-        <div class="tip">
-          <strong>Great for:</strong> Married couples, parent-child duos, or friends who want to play together.
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h4>Open Venue Settings</h4>
         </div>
+        <p>Tap the gear icon (⚙️) in the header, then "Set Up Venue".</p>
       </div>
 
       <div class="step">
-        <p style="font-size: 1.2rem; margin-bottom: 16px;">
-          <span class="emoji">👤</span>
-          <strong>Singles Mode</strong>
-        </p>
-        <p>Running 1v1 games instead of doubles?</p>
-        <ul style="margin-left: 20px; margin-top: 12px; font-size: 1.1rem;">
-          <li style="margin-bottom: 8px;">During setup, tap "Singles" instead of "Doubles"</li>
-          <li style="margin-bottom: 8px;">The app will put 2 players per court instead of 4</li>
-          <li style="margin-bottom: 8px;">Everything else works the same!</li>
-        </ul>
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h4>Enter Venue Name</h4>
+        </div>
+        <p>Type your venue name (e.g., "Green Valley Recreation Center"). A URL will be auto-generated.</p>
       </div>
 
       <div class="step">
-        <p style="font-size: 1.2rem; margin-bottom: 16px;">
-          <span class="emoji">🔊</span>
-          <strong>Voice Announcements</strong>
-        </p>
-        <p>The app can announce matches out loud!</p>
-        <ul style="margin-left: 20px; margin-top: 12px; font-size: 1.1rem;">
-          <li style="margin-bottom: 8px;">When a new match starts, it reads the players and court number</li>
-          <li style="margin-bottom: 8px;">Tap the speaker icon in the header to mute/unmute</li>
-          <li style="margin-bottom: 8px;">Great for busy courts where players might miss the screen</li>
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h4>Set a Password</h4>
+        </div>
+        <p>Choose a password (minimum 4 characters). Staff will use this to access your venue on other devices.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">4</span>
+          <h4>Create the Venue</h4>
+        </div>
+        <p>Tap "Create Venue". All your existing players and stats will sync to the cloud.</p>
+      </div>
+
+      <h3>Joining an Existing Venue</h3>
+      <p>If your venue is already set up:</p>
+      <ol>
+        <li>Tap the gear icon, then "Join Venue"</li>
+        <li>Enter the venue URL slug (provided by your administrator)</li>
+        <li>Enter the venue password</li>
+        <li>Tap "Join" - all data syncs automatically</li>
+      </ol>
+
+      <h3>Venue Settings</h3>
+      <ul>
+        <li><strong>Minimum Games for Ranking:</strong> Set how many games players need before appearing on the leaderboard (1-50)</li>
+      </ul>
+
+      <div class="success">
+        <strong>Public Leaderboard:</strong> Once set up, your venue gets a public URL (e.g., pickleq.app/v/your-venue) where anyone can view leaderboards without logging in!
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- OFFLINE MODE -->
+    <section class="section" id="offline-mode">
+      <h2>Offline Mode</h2>
+      <p>PickleQ works completely offline! This is great for outdoor courts with spotty wifi.</p>
+
+      <h3>How Offline Mode Works</h3>
+      <ul>
+        <li><strong>All data saves locally:</strong> Everything is stored on your device</li>
+        <li><strong>Full functionality:</strong> Add players, run sessions, track stats - everything works</li>
+        <li><strong>Auto-sync:</strong> When you get internet again, data syncs to the cloud (if venue is set up)</li>
+      </ul>
+
+      <h3>Syncing After Being Offline</h3>
+      <p>If you run a session offline with a venue configured:</p>
+      <ol>
+        <li>Sessions are queued for sync</li>
+        <li>When internet returns, PickleQ automatically syncs</li>
+        <li>You'll see a sync indicator in the header</li>
+      </ol>
+
+      <div class="warning">
+        <strong>Important:</strong> If you use multiple devices offline simultaneously, data may conflict. For best results, use one device at a time when offline.
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
+    </section>
+
+    <!-- TROUBLESHOOTING -->
+    <section class="section" id="troubleshooting">
+      <h2>Troubleshooting</h2>
+
+      <h3>Common Issues</h3>
+
+      <div class="faq-item">
+        <h4>The app isn't loading</h4>
+        <p>Try refreshing the page. If that doesn't work, clear your browser cache or try a different browser. PickleQ works best on Chrome, Safari, and Firefox.</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>I accidentally recorded the wrong winner</h4>
+        <p>Look for the "Undo" popup that appears for 10 seconds after recording. Tap it to reverse the result. If the popup is gone, you'll need to manually adjust (the stats will be slightly off).</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>A player is stuck on a court</h4>
+        <p>Tap the player's name on the court card and select "Pull from Court". They'll return to the queue.</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>Voice announcements aren't working</h4>
+        <p>Check that:</p>
+        <ul>
+          <li>The mute button (🔊) is not muted</li>
+          <li>Your device volume is up</li>
+          <li>Your browser has permission to play audio</li>
         </ul>
       </div>
+
+      <div class="faq-item">
+        <h4>Stats aren't syncing to cloud</h4>
+        <p>Make sure:</p>
+        <ul>
+          <li>You have a venue set up (tap gear icon)</li>
+          <li>You have an internet connection</li>
+          <li>The sync indicator isn't showing an error</li>
+        </ul>
+      </div>
+
+      <div class="faq-item">
+        <h4>I can't start the session</h4>
+        <p>The "Start Session" button requires at least 4 checked-in players (for doubles) or 2 (for singles). Make sure enough players are in the "Checked In" section.</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>My data disappeared</h4>
+        <p>Data is stored in your browser's local storage. If you cleared browser data, switched browsers, or used incognito mode, local data won't be there. Cloud-synced data (venues) is preserved - just rejoin your venue.</p>
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
     </section>
 
     <!-- FAQ -->
-    <section>
-      <h2>Common Questions</h2>
+    <section class="section" id="faq">
+      <h2>Frequently Asked Questions</h2>
 
-      <div class="faq">
-        <h3>What if a player arrives late?</h3>
-        <p>Just add them and check them in! They'll join the next available game.</p>
+      <div class="faq-item">
+        <h4>Is PickleQ free?</h4>
+        <p>Yes! PickleQ is completely free to use. No subscriptions, no hidden fees.</p>
       </div>
 
-      <div class="faq">
-        <h3>What if a player needs to leave early?</h3>
-        <p>Tap their name and check them out. They won't be assigned to new games.</p>
+      <div class="faq-item">
+        <h4>Do I need to create an account?</h4>
+        <p>No account is needed for basic use. Creating a venue (optional) enables cloud sync and public leaderboards.</p>
       </div>
 
-      <div class="faq">
-        <h3>What if someone leaves mid-game?</h3>
-        <p>The app will find a substitute from the waiting line!</p>
+      <div class="faq-item">
+        <h4>Does PickleQ work on my device?</h4>
+        <p>PickleQ works on any device with a modern web browser - phones, tablets, laptops, and desktops. No app download required.</p>
       </div>
 
-      <div class="faq">
-        <h3>Do I need internet?</h3>
-        <p>The app works offline! Stats sync to the cloud when you have internet.</p>
+      <div class="faq-item">
+        <h4>How does the queue system ensure fairness?</h4>
+        <p>It's first-in-first-out (FIFO). Players who check in earlier play sooner. After each game, all players go to the back of the queue.</p>
       </div>
 
-      <div class="faq">
-        <h3>What if I close the app by accident?</h3>
-        <p>Don't worry! The app saves everything. Just open it again.</p>
+      <div class="faq-item">
+        <h4>How are teams balanced?</h4>
+        <p>PickleQ pairs players of different skill levels together. A ★★★ player partners with a ★ player, facing another similar pairing. This creates competitive games for everyone.</p>
       </div>
 
-      <div class="faq">
-        <h3>How does the app pick teams?</h3>
-        <p>It tries to balance skill levels. A strong player pairs with a newer player, so games are fair and fun!</p>
+      <div class="faq-item">
+        <h4>Can players see their own stats?</h4>
+        <p>Yes! After a session ends, players can view and share their stats. With a venue set up, they can also access the public leaderboard anytime.</p>
       </div>
+
+      <div class="faq-item">
+        <h4>What happens if someone leaves mid-game?</h4>
+        <p>PickleQ automatically finds a substitute from the queue. If no substitute is available, the match is paused until someone is available.</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>Can I run multiple sessions at different locations?</h4>
+        <p>Yes! Each browser/device maintains its own session. You can run simultaneous sessions at different courts.</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>How do I delete a player from my roster?</h4>
+        <p>Go to the Players screen (tap the players icon), find the player, and tap "Delete". This removes them from your saved roster but preserves their historical stats.</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>Can I change a player's skill level mid-session?</h4>
+        <p>Yes! Tap the player's name and select "Edit" to change their skill level. The change takes effect for their next game.</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>What's the maximum number of courts?</h4>
+        <p>PickleQ supports up to 10 courts per session.</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>How are ties broken on the leaderboard?</h4>
+        <p>First by win percentage, then by total games played, then alphabetically by name.</p>
+      </div>
+
+      <div class="back-to-top"><a href="#top">Back to top</a></div>
     </section>
 
     <!-- CTA -->
-    <section style="text-align: center; padding: 40px 0;">
-      <h2 style="border: none; margin-bottom: 16px;">Ready to Start?</h2>
-      <p style="font-size: 1.2rem; margin-bottom: 20px;">Open the app and run your first session!</p>
+    <section class="section" style="text-align: center; padding: 48px 32px;">
+      <h2 style="border: none; margin-bottom: 16px;">Ready to Play?</h2>
+      <p style="font-size: 1.2rem; margin-bottom: 24px;">Open PickleQ and start your first session!</p>
       <a href="/" class="button">Open PickleQ</a>
+      <br><br>
+      <a href="/" class="button button-secondary" style="margin-top: 12px;">Back to Home</a>
     </section>
 
     <footer>
       <p>Questions? Email us at <a href="mailto:hello@pickleq.app">hello@pickleq.app</a></p>
-      <p style="margin-top: 12px;">Made with 💚 for the pickleball community</p>
+      <p style="margin-top: 12px; font-size: 0.9rem; color: #888;">
+        PickleQ User Guide v1.0
+      </p>
+      <p style="margin-top: 12px;">Made with love for the pickleball community</p>
     </footer>
   </div>
 </body>
