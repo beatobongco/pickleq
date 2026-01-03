@@ -348,9 +348,9 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
               </button>
             </div>
 
-            {/* Preview - scaled for display only */}
-            <div className="flex justify-center mb-6 overflow-hidden">
-              <div className="transform scale-[0.85] origin-top">
+            {/* Preview - scaled for display, constrained height so buttons are always visible */}
+            <div className="flex justify-center mb-4 overflow-hidden h-[300px]">
+              <div className="transform scale-[0.60] origin-top">
                 <PlayerStatsCard
                   name={sharePlayer.playerName}
                   skill={sharePlayer.skill}
