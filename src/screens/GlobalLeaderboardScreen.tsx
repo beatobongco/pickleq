@@ -281,6 +281,7 @@ export function GlobalLeaderboardScreen() {
             <RecentSessions
               sessions={recentSessions}
               loading={loadingSessions}
+              venueSlug={venue.slug}
             />
           </div>
         )}
