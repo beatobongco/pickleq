@@ -152,18 +152,16 @@ export const PlayerStatsCard = forwardRef<HTMLDivElement, PlayerStatsCardProps>(
       </div>
     );
 
-    // For sharing: wrap in a container with background for Instagram Post dimensions (4:5)
-    // At 2x scale from domToPng, this becomes 1080x1350 - perfect for IG feed posts
-    // Card is scaled up to fill more of the frame
+    // For sharing: wrap in a container with background for Instagram Story dimensions (9:16)
+    // At 2x scale from domToPng, this becomes 1080x1920 - perfect for IG Stories
+    // Card stays at natural size with generous padding for a clean look
     if (forSharing) {
       return (
         <div
           ref={ref}
-          className="w-[540px] h-[675px] bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 flex items-center justify-center p-8"
+          className="w-[540px] h-[960px] bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 flex items-center justify-center"
         >
-          <div className="transform scale-[1.3] origin-center">
-            {card}
-          </div>
+          {card}
         </div>
       );
     }
