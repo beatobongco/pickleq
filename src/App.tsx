@@ -9,6 +9,7 @@ import { VenueSetupScreen } from './screens/VenueSetupScreen';
 import { PublicLeaderboardScreen } from './screens/PublicLeaderboardScreen';
 import { PublicSessionScreen } from './screens/PublicSessionScreen';
 import { LandingScreen } from './screens/LandingScreen';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { getLocalVenue } from './utils/supabase';
 import { identifyVenue } from './utils/analytics';
 
@@ -103,26 +104,40 @@ function App() {
 
   // Public session page (shareable session results)
   if (route.type === 'session' && route.venueSlug && route.sessionId) {
-    return <PublicSessionScreen slug={route.venueSlug} sessionId={route.sessionId} />;
+    return (
+      <ErrorBoundary>
+        <PublicSessionScreen slug={route.venueSlug} sessionId={route.sessionId} />
+      </ErrorBoundary>
+    );
   }
 
   // Public venue leaderboard (no session provider needed)
   if (route.type === 'venue' && route.venueSlug) {
-    return <PublicLeaderboardScreen slug={route.venueSlug} />;
+    return (
+      <ErrorBoundary>
+        <PublicLeaderboardScreen slug={route.venueSlug} />
+      </ErrorBoundary>
+    );
   }
 
   // Landing page for new visitors
   if (route.type === 'landing') {
-    return <LandingScreen onGetStarted={handleGetStarted} />;
+    return (
+      <ErrorBoundary>
+        <LandingScreen onGetStarted={handleGetStarted} />
+      </ErrorBoundary>
+    );
   }
 
   // Staff app with full session management
   return (
-    <LandingContext.Provider value={handleShowLanding}>
-      <SessionProvider>
-        <AppContent />
-      </SessionProvider>
-    </LandingContext.Provider>
+    <ErrorBoundary>
+      <LandingContext.Provider value={handleShowLanding}>
+        <SessionProvider>
+          <AppContent />
+        </SessionProvider>
+      </LandingContext.Provider>
+    </ErrorBoundary>
   );
 }
 
