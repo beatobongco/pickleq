@@ -1,17 +1,40 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
 import { getSkillLabel } from '../components/SkillSelector';
 import { ShareModal } from '../components/ShareModal';
+import { RecentSessions } from '../components/RecentSessions';
 import { getSavedPlayers, type SavedPlayer } from '../utils/storage';
-import { getLocalVenue } from '../utils/supabase';
+import { getLocalVenue, getVenueSessions } from '../utils/supabase';
+import type { VenueSession } from '../types';
 
 export function GlobalLeaderboardScreen() {
   const { setScreen } = useSession();
   const [sharePlayer, setSharePlayer] = useState<SavedPlayer | null>(null);
+  const [recentSessions, setRecentSessions] = useState<VenueSession[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(true);
   const venue = getLocalVenue();
 
   const players = useMemo(() => getSavedPlayers(), []);
+
+  // Fetch recent sessions
+  useEffect(() => {
+    async function fetchSessions() {
+      if (!venue) {
+        setLoadingSessions(false);
+        return;
+      }
+      try {
+        const sessions = await getVenueSessions(venue.id, 10);
+        setRecentSessions(sessions);
+      } catch (err) {
+        console.error('Failed to fetch sessions:', err);
+      } finally {
+        setLoadingSessions(false);
+      }
+    }
+    fetchSessions();
+  }, [venue]);
 
   const MIN_GAMES_FOR_RANKING = 10;
 
@@ -249,6 +272,16 @@ export function GlobalLeaderboardScreen() {
                 .map(p => p.name)
                 .join(', ')}
             </div>
+          </div>
+        )}
+
+        {/* Recent Sessions */}
+        {venue && (
+          <div className="mt-6">
+            <RecentSessions
+              sessions={recentSessions}
+              loading={loadingSessions}
+            />
           </div>
         )}
       </main>

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { getVenueBySlug, getVenuePlayers, getVenueSessions } from '../utils/supabase';
 import { getSkillLabel } from '../components/SkillSelector';
 import { ShareModal } from '../components/ShareModal';
+import { RecentSessions } from '../components/RecentSessions';
 import { trackPublicLeaderboardViewed } from '../utils/analytics';
 import type { Venue, VenuePlayer, VenueSession } from '../types';
 
@@ -316,44 +317,8 @@ export function PublicLeaderboardScreen({ slug }: PublicLeaderboardScreenProps) 
 
         {/* Recent Sessions */}
         {sessions.length > 0 && (
-          <div className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div className="bg-gray-100 px-4 py-3 border-b">
-              <h2 className="font-semibold text-gray-700">Recent Sessions</h2>
-            </div>
-
-            <div className="divide-y divide-gray-100">
-              {sessions.map((session) => {
-                const sessionDate = new Date(session.endedAt);
-                const formattedDate = sessionDate.toLocaleDateString('en-US', {
-                  weekday: 'short',
-                  month: 'short',
-                  day: 'numeric',
-                });
-
-                return (
-                  <a
-                    key={session.id}
-                    href={`/venue/${slug}/session/${session.id}`}
-                    className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="text-2xl">📅</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900">{formattedDate}</div>
-                      <div className="text-sm text-gray-500">
-                        {session.location}
-                        <span className="mx-1">•</span>
-                        {session.totalGames} games
-                      </div>
-                    </div>
-                    <div className="text-gray-400">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
+          <div className="mt-6">
+            <RecentSessions sessions={sessions} venueSlug={slug} />
           </div>
         )}
 
