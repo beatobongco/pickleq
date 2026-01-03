@@ -79,8 +79,8 @@ export function ShareModal({ isOpen, onClose, player, location, venueName, rank,
     : new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 pb-safe">
+      <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-gray-900">Share Stats</h3>
           <button
@@ -110,7 +110,7 @@ export function ShareModal({ isOpen, onClose, player, location, venueName, rank,
           </div>
         </div>
 
-        {/* Hidden card for capturing - rendered at full size without transforms */}
+        {/* Hidden card for capturing - rendered at full size with Instagram-friendly dimensions */}
         <div className="absolute -left-[9999px]">
           <PlayerStatsCard
             ref={cardRef}
@@ -125,6 +125,7 @@ export function ShareModal({ isOpen, onClose, player, location, venueName, rank,
             rank={rank}
             totalPlayers={totalRankedPlayers}
             cardType={cardType}
+            forSharing={true}
           />
         </div>
 

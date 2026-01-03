@@ -336,8 +336,8 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
 
       {/* Share Modal */}
       {sharePlayer && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 pb-safe">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-gray-900">Share Stats</h3>
               <button
@@ -348,11 +348,10 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
               </button>
             </div>
 
-            {/* Preview */}
+            {/* Preview - scaled for display only */}
             <div className="flex justify-center mb-6 overflow-hidden">
               <div className="transform scale-[0.85] origin-top">
                 <PlayerStatsCard
-                  ref={cardRef}
                   name={sharePlayer.playerName}
                   skill={sharePlayer.skill}
                   wins={sharePlayer.wins}
@@ -365,6 +364,24 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
                   totalPlayers={totalPlayers}
                 />
               </div>
+            </div>
+
+            {/* Hidden card for capturing - rendered at full size with Instagram-friendly dimensions */}
+            <div className="absolute -left-[9999px]">
+              <PlayerStatsCard
+                ref={cardRef}
+                name={sharePlayer.playerName}
+                skill={sharePlayer.skill}
+                wins={sharePlayer.wins}
+                losses={sharePlayer.losses}
+                gamesPlayed={sharePlayer.gamesPlayed}
+                venueName={venue.name}
+                location={session.location}
+                date={formatDate(session.endedAt)}
+                rank={sortedPlayers.findIndex(p => p.id === sharePlayer.id) + 1}
+                totalPlayers={totalPlayers}
+                forSharing={true}
+              />
             </div>
 
             {/* Actions */}

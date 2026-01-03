@@ -18,10 +18,12 @@ interface PlayerStatsCardProps {
   // Card type: 'session' shows simplified stats, 'alltime' shows full stats
   // Defaults to 'session' when rank is provided for backwards compatibility
   cardType?: 'session' | 'alltime';
+  // For sharing: wrap card in a centered container optimized for Instagram
+  forSharing?: boolean;
 }
 
 export const PlayerStatsCard = forwardRef<HTMLDivElement, PlayerStatsCardProps>(
-  ({ name, skill, wins, losses, gamesPlayed, winStreak, location, venueName, date, rank, totalPlayers, cardType }, ref) => {
+  ({ name, skill, wins, losses, gamesPlayed, winStreak, location, venueName, date, rank, totalPlayers, cardType, forSharing }, ref) => {
     const winRate = gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 100) : 0;
 
     const getMedal = (r: number) => {
@@ -36,9 +38,8 @@ export const PlayerStatsCard = forwardRef<HTMLDivElement, PlayerStatsCardProps>(
     // Default to 'session' for backwards compatibility when rank is provided
     const isSessionCard = hasRank && cardType !== 'alltime';
 
-    return (
+    const card = (
       <div
-        ref={ref}
         className="w-[360px] bg-gradient-to-br from-green-600 to-green-800 rounded-2xl p-6 text-white shadow-2xl"
       >
         {/* Header */}
@@ -148,6 +149,25 @@ export const PlayerStatsCard = forwardRef<HTMLDivElement, PlayerStatsCardProps>(
           )}
           <div className="text-white/50 text-sm">pickleq.app</div>
         </div>
+      </div>
+    );
+
+    // For sharing: wrap in a container with background for Instagram-friendly dimensions
+    if (forSharing) {
+      return (
+        <div
+          ref={ref}
+          className="w-[540px] h-[720px] bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 flex items-center justify-center"
+        >
+          {card}
+        </div>
+      );
+    }
+
+    // Normal display: just the card with ref
+    return (
+      <div ref={ref}>
+        {card}
       </div>
     );
   }
