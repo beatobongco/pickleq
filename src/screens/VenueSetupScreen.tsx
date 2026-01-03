@@ -10,7 +10,10 @@ import {
   joinVenue,
   clearLocalVenue,
   isSupabaseConfigured,
+  getVenueSettings,
+  updateVenueSettings,
 } from '../utils/supabase';
+import { DEFAULT_VENUE_SETTINGS } from '../types';
 import { identifyVenue, resetIdentity, trackVenueCreated, trackVenueJoined } from '../utils/analytics';
 
 export function VenueSetupScreen() {
@@ -30,6 +33,15 @@ export function VenueSetupScreen() {
 
   const existingVenue = getLocalVenue();
   const isConfigured = isSupabaseConfigured();
+  const [minGamesForRanking, setMinGamesForRanking] = useState(
+    () => getVenueSettings().minGamesForRanking
+  );
+
+  const handleUpdateMinGames = (value: number) => {
+    const clamped = Math.max(1, Math.min(50, value));
+    setMinGamesForRanking(clamped);
+    updateVenueSettings({ minGamesForRanking: clamped });
+  };
 
   // Auto-generate slug from name
   useEffect(() => {
@@ -217,6 +229,49 @@ export function VenueSetupScreen() {
                   size={180}
                   label="Scan to view leaderboard"
                 />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              <h3 className="font-semibold text-gray-700 mb-4">Leaderboard Settings</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Minimum games for ranking
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Players need at least this many games to appear on the ranked leaderboard.
+                  Lower values show more players; higher values ensure more reliable rankings.
+                </p>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleUpdateMinGames(minGamesForRanking - 1)}
+                    disabled={minGamesForRanking <= 1}
+                    className="w-12 h-12 text-xl"
+                  >
+                    −
+                  </Button>
+                  <span className="text-3xl font-bold text-gray-900 w-16 text-center">
+                    {minGamesForRanking}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleUpdateMinGames(minGamesForRanking + 1)}
+                    disabled={minGamesForRanking >= 50}
+                    className="w-12 h-12 text-xl"
+                  >
+                    +
+                  </Button>
+                  <button
+                    onClick={() => handleUpdateMinGames(DEFAULT_VENUE_SETTINGS.minGamesForRanking)}
+                    className="text-sm text-gray-500 hover:text-gray-700 ml-2"
+                  >
+                    Reset to default ({DEFAULT_VENUE_SETTINGS.minGamesForRanking})
+                  </button>
+                </div>
               </div>
             </div>
 

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Venue, VenuePlayer, VenueSession, SessionPlayer, SkillLevel } from '../types';
+import type { Venue, VenuePlayer, VenueSession, SessionPlayer, SkillLevel, VenueSettings } from '../types';
+import { DEFAULT_VENUE_SETTINGS } from '../types';
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -30,7 +31,25 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 // Venue management
 export function getLocalVenue(): Venue | null {
   const stored = localStorage.getItem(VENUE_KEY);
-  return stored ? JSON.parse(stored) : null;
+  if (!stored) return null;
+  const venue = JSON.parse(stored) as Venue;
+  // Ensure settings exist with defaults
+  if (!venue.settings) {
+    venue.settings = { ...DEFAULT_VENUE_SETTINGS };
+  }
+  return venue;
+}
+
+export function getVenueSettings(): VenueSettings {
+  const venue = getLocalVenue();
+  return venue?.settings ?? { ...DEFAULT_VENUE_SETTINGS };
+}
+
+export function updateVenueSettings(settings: Partial<VenueSettings>): void {
+  const venue = getLocalVenue();
+  if (!venue) return;
+  venue.settings = { ...DEFAULT_VENUE_SETTINGS, ...venue.settings, ...settings };
+  setLocalVenue(venue);
 }
 
 export function setLocalVenue(venue: Venue): void {

@@ -47,12 +47,21 @@ export interface UndoAction {
   timestamp: number;
 }
 
+export interface VenueSettings {
+  minGamesForRanking: number; // Minimum games required to appear on ranked leaderboard
+}
+
+export const DEFAULT_VENUE_SETTINGS: VenueSettings = {
+  minGamesForRanking: 10,
+};
+
 export interface Venue {
   id: string;
   slug: string;
   name: string;
   createdAt: string;
   passwordHash?: string;
+  settings?: VenueSettings;
 }
 
 export interface VenuePlayer {

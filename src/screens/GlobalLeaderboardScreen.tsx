@@ -5,7 +5,7 @@ import { getSkillLabel } from '../components/SkillSelector';
 import { ShareModal } from '../components/ShareModal';
 import { RecentSessions } from '../components/RecentSessions';
 import { getSavedPlayers, type SavedPlayer } from '../utils/storage';
-import { getLocalVenue, getVenueSessions } from '../utils/supabase';
+import { getLocalVenue, getVenueSessions, getVenueSettings } from '../utils/supabase';
 import type { VenueSession } from '../types';
 
 export function GlobalLeaderboardScreen() {
@@ -36,7 +36,7 @@ export function GlobalLeaderboardScreen() {
     fetchSessions();
   }, [venue]);
 
-  const MIN_GAMES_FOR_RANKING = 10;
+  const minGamesForRanking = getVenueSettings().minGamesForRanking;
 
   const { rankedPlayers, unrankedPlayers } = useMemo(() => {
     const activePlayers = [...players]
@@ -53,8 +53,8 @@ export function GlobalLeaderboardScreen() {
       });
 
     return {
-      rankedPlayers: activePlayers.filter(p => p.lifetimeGames >= MIN_GAMES_FOR_RANKING),
-      unrankedPlayers: activePlayers.filter(p => p.lifetimeGames < MIN_GAMES_FOR_RANKING),
+      rankedPlayers: activePlayers.filter(p => p.lifetimeGames >= minGamesForRanking),
+      unrankedPlayers: activePlayers.filter(p => p.lifetimeGames < minGamesForRanking),
     };
   }, [players]);
 
@@ -117,7 +117,7 @@ export function GlobalLeaderboardScreen() {
             <div className="p-8 text-center text-gray-500">
               <div className="text-4xl mb-3">🏆</div>
               <p className="text-lg">No ranked players yet</p>
-              <p className="text-sm mt-1">Play {MIN_GAMES_FOR_RANKING}+ games to get ranked</p>
+              <p className="text-sm mt-1">Play {minGamesForRanking}+ games to get ranked</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
@@ -197,13 +197,13 @@ export function GlobalLeaderboardScreen() {
               <h2 className="font-semibold text-gray-500">
                 Unranked ({unrankedPlayers.length})
               </h2>
-              <p className="text-xs text-gray-400 mt-0.5">Play {MIN_GAMES_FOR_RANKING} games to get ranked</p>
+              <p className="text-xs text-gray-400 mt-0.5">Play {minGamesForRanking} games to get ranked</p>
             </div>
 
             <div className="divide-y divide-gray-100">
               {unrankedPlayers.map((player) => {
                 const winRate = getWinRate(player);
-                const gamesNeeded = MIN_GAMES_FOR_RANKING - player.lifetimeGames;
+                const gamesNeeded = minGamesForRanking - player.lifetimeGames;
 
                 return (
                   <div
@@ -213,7 +213,7 @@ export function GlobalLeaderboardScreen() {
                     {/* Progress indicator */}
                     <div className="w-12 text-center">
                       <span className="text-sm font-medium text-gray-400">
-                        {player.lifetimeGames}/{MIN_GAMES_FOR_RANKING}
+                        {player.lifetimeGames}/{minGamesForRanking}
                       </span>
                     </div>
 
