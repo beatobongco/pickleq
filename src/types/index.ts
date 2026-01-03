@@ -14,6 +14,7 @@ export interface Player {
   lockedPartnerId: string | null;
   courtsPlayed: number[];
   checkedInAt: number | null;
+  lastMatchId: string | null; // ID of most recent match for variety in matching
 }
 
 export interface Match {

@@ -150,8 +150,43 @@ export function selectNextPlayers(queue: Player[], gameMode: GameMode): Player[]
       return avgA - avgB;
     });
 
-    // If no locked pairs are in top 4, just use top 4 (fairest selection)
+    // If no locked pairs are in top 4, use top 4 but check for same-match grouping
     if (relevantLockedPairs.length === 0) {
+      // Check if 3+ of top 4 just played in the same match
+      const lastMatchIds = top4.map(p => p.lastMatchId).filter(id => id !== null);
+      const matchIdCounts = new Map<string, number>();
+      for (const id of lastMatchIds) {
+        matchIdCounts.set(id, (matchIdCounts.get(id) || 0) + 1);
+      }
+
+      // Find if any match has 3+ players from it
+      let dominantMatchId: string | null = null;
+      for (const [matchId, count] of matchIdCounts) {
+        if (count >= 3) {
+          dominantMatchId = matchId;
+          break;
+        }
+      }
+
+      // If 3+ players from same match, swap one out for variety
+      if (dominantMatchId && allCandidates.length > 4) {
+        // Find a player from the dominant match to swap out (prefer the last one in priority)
+        const playersFromSameMatch = top4.filter(p => p.lastMatchId === dominantMatchId);
+        const playerToSwapOut = playersFromSameMatch[playersFromSameMatch.length - 1];
+
+        // Find a replacement from candidates 5+ who has a different lastMatchId
+        const replacement = allCandidates.slice(4).find(
+          c => c.player.lastMatchId !== dominantMatchId
+        );
+
+        if (replacement) {
+          // Swap: remove playerToSwapOut, add replacement
+          const newTop4 = top4.filter(p => p.id !== playerToSwapOut.id);
+          newTop4.push(replacement.player);
+          return newTop4;
+        }
+      }
+
       return top4;
     }
 

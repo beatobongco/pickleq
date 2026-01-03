@@ -217,6 +217,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         lockedPartnerId: null,
         courtsPlayed: [],
         checkedInAt: isActiveSession ? Date.now() : null,
+        lastMatchId: null,
       };
       return {
         ...state,
@@ -242,6 +243,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         lockedPartnerId: null,
         courtsPlayed: [],
         checkedInAt: isActiveSession ? Date.now() : null,
+        lastMatchId: null,
       };
       return {
         ...state,
@@ -351,6 +353,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
 
       // Update player stats and return them to queue
       // IMPORTANT: Update checkedInAt to NOW so they go to back of queue
+      // Also set lastMatchId to help avoid putting same 4 players together again
       const now = Date.now();
       const updatedPlayers = state.session.players.map(p => {
         if (winningTeam.includes(p.id)) {
@@ -360,6 +363,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
             gamesPlayed: p.gamesPlayed + 1,
             wins: p.wins + 1,
             checkedInAt: now, // Go to back of queue
+            lastMatchId: match.id, // Track for variety in matching
           };
         }
         if (losingTeam.includes(p.id)) {
@@ -369,6 +373,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
             gamesPlayed: p.gamesPlayed + 1,
             losses: p.losses + 1,
             checkedInAt: now, // Go to back of queue
+            lastMatchId: match.id, // Track for variety in matching
           };
         }
         return p;
