@@ -4,6 +4,7 @@ import type { Session, Player, Match, AppScreen, SkillLevel, UndoAction, GameMod
 import { saveSession, loadSession, clearSession, generateId, saveLocation, updatePlayerStats, getSavedLocations, getSyncedSessionId, saveSyncedSessionId } from '../utils/storage';
 import { selectNextPlayers, formTeams, createMatch, findSubstitute } from '../utils/matching';
 import { createSessionAndSync, processSyncQueue, getLocalVenue } from '../utils/supabase';
+import { trackSessionStarted, trackGameRecorded, trackSessionEnded } from '../utils/analytics';
 
 // Exported for testing
 export interface SessionState {
@@ -824,12 +825,23 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'CHECK_IN_PLAYER', playerId }), []),
     checkOutPlayer: useCallback((playerId: string) =>
       dispatch({ type: 'CHECK_OUT_PLAYER', playerId }), []),
-    startSession: useCallback(() =>
-      dispatch({ type: 'START_SESSION' }), []),
-    endSession: useCallback(() =>
-      dispatch({ type: 'END_SESSION' }), []),
-    recordWinner: useCallback((matchId: string, winner: 1 | 2) =>
-      dispatch({ type: 'RECORD_WINNER', matchId, winner }), []),
+    startSession: useCallback(() => {
+      dispatch({ type: 'START_SESSION' });
+      const playerCount = state.session.players.filter(p => p.status === 'checked-in').length;
+      trackSessionStarted(playerCount, state.session.courts, state.session.location);
+    }, [state.session.players, state.session.courts, state.session.location]),
+    endSession: useCallback(() => {
+      dispatch({ type: 'END_SESSION' });
+      const playerCount = state.session.players.filter(p => p.gamesPlayed > 0).length;
+      const durationMinutes = state.session.startTime
+        ? Math.round((Date.now() - state.session.startTime) / 60000)
+        : 0;
+      trackSessionEnded(state.session.matches.length, playerCount, durationMinutes);
+    }, [state.session.players, state.session.matches.length, state.session.startTime]),
+    recordWinner: useCallback((matchId: string, winner: 1 | 2) => {
+      dispatch({ type: 'RECORD_WINNER', matchId, winner });
+      trackGameRecorded(state.session.matches.length + 1);
+    }, [state.session.matches.length]),
     undoWinner: useCallback((matchId: string) =>
       dispatch({ type: 'UNDO_WINNER', matchId }), []),
     removeFromCourt: useCallback((playerId: string, matchId: string) =>
