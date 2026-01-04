@@ -94,9 +94,12 @@ export function SetupScreen() {
       <main className="max-w-2xl mx-auto p-4 space-y-6">
         {/* Location */}
         <section className="bg-white rounded-2xl p-4 shadow-sm">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
             Location
           </label>
+          <p className="text-xs text-gray-500 mb-2">
+            Where are you playing? (e.g., Main Court, Indoor Gym, Community Center)
+          </p>
 
           {/* Saved locations as quick-select buttons */}
           {savedLocations.length > 0 && (

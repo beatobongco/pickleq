@@ -322,13 +322,16 @@ export function VenueSetupScreen() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Venue Name
+                        Venue or Group Name
                       </label>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Your gym, club, or play group name
+                      </p>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="e.g., Manila Pickleball Club"
+                        placeholder="e.g., BGC Pickleball, Sunday Sesh"
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
                       />
                     </div>
