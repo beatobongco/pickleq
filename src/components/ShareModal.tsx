@@ -92,7 +92,7 @@ export function ShareModal({ isOpen, onClose, player, location, venueName, rank,
         </div>
 
         {/* Preview - scaled for display, constrained height so buttons are always visible */}
-        <div className="flex justify-center mb-4 overflow-hidden h-[320px]">
+        <div className="flex justify-center mb-4 overflow-hidden h-[400px]">
           <div className="transform scale-[0.65] origin-top">
             <PlayerStatsCard
               name={player.name}

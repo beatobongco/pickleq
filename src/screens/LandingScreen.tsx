@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../components/Button';
 import { trackLandingPageViewed, trackGetStartedClicked } from '../utils/analytics';
 
@@ -6,7 +6,16 @@ interface LandingScreenProps {
   onGetStarted: () => void;
 }
 
+const screenshots = [
+  { src: '/screenshots/PickleQ-Setup.png', alt: 'Setup screen - add players and configure courts' },
+  { src: '/screenshots/PickleQ-GameScreen.png', alt: 'Play screen - manage active games and queue' },
+  { src: '/screenshots/PickleQ-Leaderboard.png', alt: 'Leaderboard - see final standings' },
+  { src: '/screenshots/PickleQ-ShareStats.png', alt: 'Share stats - players can share their results' },
+];
+
 export function LandingScreen({ onGetStarted }: LandingScreenProps) {
+  const [fullscreenImage, setFullscreenImage] = useState<{ src: string; alt: string } | null>(null);
+
   useEffect(() => {
     trackLandingPageViewed();
   }, []);
@@ -33,14 +42,46 @@ export function LandingScreen({ onGetStarted }: LandingScreenProps) {
 
       <main className="max-w-4xl mx-auto px-4 pb-16">
         {/* Hero */}
-        <section className="text-center py-12 md:py-20">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <section className="text-center py-8 md:py-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
             Open Play,<br />Made Simple
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             The free, easy-to-use app for managing pickleball open play sessions.
             Handle check-ins, match players by skill, and keep courts rotating smoothly.
           </p>
+        </section>
+
+        {/* Screenshot Gallery */}
+        <section className="py-2 -mx-4">
+          <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
+            {screenshots.map((screenshot, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 snap-start"
+              >
+                <button
+                  onClick={() => setFullscreenImage(screenshot)}
+                  className="h-[240px] bg-transparent cursor-pointer hover:scale-[1.02] transition-all"
+                >
+                  <img
+                    src={screenshot.src}
+                    alt={screenshot.alt}
+                    className="h-full w-auto rounded-xl shadow-md"
+                    onError={(e) => {
+                      // Hide broken image
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA after screenshots */}
+        <section className="text-center py-6">
           <Button variant="primary" size="lg" onClick={handleGetStarted} className="text-lg px-8">
             Start Managing Open Play
           </Button>
@@ -200,6 +241,28 @@ export function LandingScreen({ onGetStarted }: LandingScreenProps) {
           <p>Made for the pickleball community by <a className="text-blue-600" href="https://beatobongco.com">Beato Bongco</a>.</p>
         </footer>
       </main>
+
+      {/* Fullscreen Image Modal */}
+      {fullscreenImage && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button
+            onClick={() => setFullscreenImage(null)}
+            className="absolute top-4 right-4 text-white/80 hover:text-white text-4xl font-light w-12 h-12 flex items-center justify-center"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          <img
+            src={fullscreenImage.src}
+            alt={fullscreenImage.alt}
+            className="max-h-[90vh] max-w-full object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
