@@ -6,6 +6,7 @@ import { PlayerCard } from '../components/PlayerCard';
 import { PlayerPicker } from '../components/PlayerPicker';
 import { SkillSelector } from '../components/SkillSelector';
 import { UndoToast } from '../components/UndoToast';
+import { LiveStandingsModal } from '../components/LiveStandingsModal';
 import { announceNextMatch, announceWinner, isMuted, setMuted, cancelAllSpeech } from '../utils/speech';
 
 function formatDuration(ms: number): string {
@@ -36,6 +37,7 @@ export function PlayScreen() {
   } = useSession();
 
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [showLiveStandings, setShowLiveStandings] = useState(false);
   const [muted, setMutedState] = useState(isMuted);
   const [selectedForPairing, setSelectedForPairing] = useState<string | null>(null);
   const [editingSkillPlayerId, setEditingSkillPlayerId] = useState<string | null>(null);
@@ -176,6 +178,13 @@ export function PlayScreen() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowLiveStandings(true)}
+              className="p-2 rounded-lg transition-colors bg-gray-700 text-yellow-400 hover:bg-gray-600"
+              title="View live standings"
+            >
+              <span className="text-lg">🏆</span>
+            </button>
             <button
               onClick={toggleMute}
               className={`p-2 rounded-lg transition-colors ${
@@ -553,6 +562,15 @@ export function PlayScreen() {
           </div>
         </div>
       )}
+
+      {/* Live Standings Modal */}
+      <LiveStandingsModal
+        isOpen={showLiveStandings}
+        onClose={() => setShowLiveStandings(false)}
+        players={session.players}
+        totalGames={session.matches.length}
+        location={session.location}
+      />
     </div>
   );
 }
