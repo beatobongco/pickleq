@@ -3,6 +3,7 @@ import { useSession } from '../store/useSession';
 import { Button } from '../components/Button';
 import { QRCode } from '../components/QRCode';
 import { ShareModal } from '../components/ShareModal';
+import { ShareLeaderboardModal } from '../components/ShareLeaderboardModal';
 import { calculateLeaderboard, getWinPercentage } from '../utils/matching';
 import { announceLeaderboard } from '../utils/speech';
 import { getLocalVenue } from '../utils/supabase';
@@ -44,6 +45,7 @@ export function LeaderboardScreen() {
   }, [leaderboard]);
 
   const [sharePlayer, setSharePlayer] = useState<Player | null>(null);
+  const [showLeaderboardShare, setShowLeaderboardShare] = useState(false);
 
   const getMedal = (index: number) => {
     if (index === 0) return '🥇';
@@ -159,8 +161,20 @@ export function LeaderboardScreen() {
 
         {/* Leaderboard */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
             <h2 className="font-bold text-gray-800">FINAL STANDINGS</h2>
+            {leaderboard.length > 0 && (
+              <button
+                onClick={() => setShowLeaderboardShare(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition-colors"
+                title="Share leaderboard"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                Share
+              </button>
+            )}
           </div>
 
           {leaderboard.length === 0 ? (
@@ -271,7 +285,7 @@ export function LeaderboardScreen() {
         </div>
       </main>
 
-      {/* Share Modal */}
+      {/* Share Player Modal */}
       {sharePlayer && (() => {
         const rankIndex = leaderboard.findIndex(p => p.id === sharePlayer.id);
         return (
@@ -293,6 +307,23 @@ export function LeaderboardScreen() {
           />
         );
       })()}
+
+      {/* Share Leaderboard Modal */}
+      <ShareLeaderboardModal
+        isOpen={showLeaderboardShare}
+        onClose={() => setShowLeaderboardShare(false)}
+        players={leaderboard.map(p => ({
+          name: p.name,
+          skill: p.skill,
+          wins: p.wins,
+          losses: p.losses,
+          gamesPlayed: p.gamesPlayed,
+        }))}
+        venueName={venue?.name}
+        location={session.location}
+        totalGames={totalGames}
+        cardType="session"
+      />
     </div>
   );
 }

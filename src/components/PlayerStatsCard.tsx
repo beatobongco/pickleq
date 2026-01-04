@@ -147,7 +147,16 @@ export const PlayerStatsCard = forwardRef<HTMLDivElement, PlayerStatsCardProps>(
               {date && <span>{date}</span>}
             </div>
           )}
-          <div className="text-white/50 text-sm">pickleq.app</div>
+          <a
+            href="https://pickleq.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-white/50 text-sm hover:text-white/80 transition-colors"
+            onClick={(e) => forSharing && e.preventDefault()}
+          >
+            <span className="text-base">🏓</span>
+            <span>pickleq.app</span>
+          </a>
         </div>
       </div>
     );

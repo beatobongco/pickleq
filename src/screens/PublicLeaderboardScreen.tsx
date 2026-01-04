@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { getVenueBySlug, getVenuePlayers, getVenueSessions } from '../utils/supabase';
 import { getSkillLabel } from '../components/SkillSelector';
 import { ShareModal } from '../components/ShareModal';
+import { ShareLeaderboardModal } from '../components/ShareLeaderboardModal';
 import { RecentSessions } from '../components/RecentSessions';
 import { trackPublicLeaderboardViewed } from '../utils/analytics';
 import type { Venue, VenuePlayer, VenueSession } from '../types';
@@ -17,6 +18,7 @@ export function PublicLeaderboardScreen({ slug }: PublicLeaderboardScreenProps) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sharePlayer, setSharePlayer] = useState<VenuePlayer | null>(null);
+  const [showLeaderboardShare, setShowLeaderboardShare] = useState(false);
 
   useEffect(() => {
     async function loadVenue() {
@@ -143,8 +145,20 @@ export function PublicLeaderboardScreen({ slug }: PublicLeaderboardScreenProps) 
 
         {/* Ranked Leaderboard */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-gray-100 px-4 py-3 border-b">
+          <div className="bg-gray-100 px-4 py-3 border-b flex items-center justify-between">
             <h2 className="font-semibold text-gray-700">Rankings</h2>
+            {rankedPlayers.length > 0 && (
+              <button
+                onClick={() => setShowLeaderboardShare(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition-colors"
+                title="Share leaderboard"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                Share
+              </button>
+            )}
           </div>
 
           {rankedPlayers.length === 0 ? (
@@ -324,13 +338,19 @@ export function PublicLeaderboardScreen({ slug }: PublicLeaderboardScreenProps) 
 
         {/* Branding */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-400">
-            Powered by <span className="font-semibold">PickleQ</span>
-          </p>
+          <a
+            href="https://pickleq.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-green-600 transition-colors"
+          >
+            <span>🏓</span>
+            <span>Powered by <span className="font-semibold">PickleQ</span></span>
+          </a>
         </div>
       </main>
 
-      {/* Share Modal */}
+      {/* Share Player Modal */}
       {sharePlayer && (() => {
         const rankIndex = rankedPlayers.findIndex(p => p.id === sharePlayer.id);
         const isRanked = rankIndex !== -1;
@@ -352,6 +372,24 @@ export function PublicLeaderboardScreen({ slug }: PublicLeaderboardScreenProps) 
           />
         );
       })()}
+
+      {/* Share Leaderboard Modal */}
+      {venue && (
+        <ShareLeaderboardModal
+          isOpen={showLeaderboardShare}
+          onClose={() => setShowLeaderboardShare(false)}
+          players={rankedPlayers.map(p => ({
+            name: p.name,
+            skill: p.skill,
+            wins: p.lifetimeWins,
+            losses: p.lifetimeLosses,
+            gamesPlayed: p.lifetimeGames,
+          }))}
+          venueName={venue.name}
+          totalGames={totalGames}
+          cardType="alltime"
+        />
+      )}
     </div>
   );
 }

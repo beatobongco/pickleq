@@ -6,6 +6,7 @@ import {
 } from '../utils/supabase';
 import { getSkillLabel } from '../components/SkillSelector';
 import { PlayerStatsCard } from '../components/PlayerStatsCard';
+import { ShareLeaderboardModal } from '../components/ShareLeaderboardModal';
 import { Button } from '../components/Button';
 import { captureElement, shareImage, downloadImage, canNativeShare } from '../utils/share';
 import { trackPublicSessionViewed, trackStatsShared } from '../utils/analytics';
@@ -23,6 +24,7 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sharePlayer, setSharePlayer] = useState<SessionPlayer | null>(null);
+  const [showLeaderboardShare, setShowLeaderboardShare] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -215,8 +217,20 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
 
         {/* Session Leaderboard */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-gray-100 px-4 py-3 border-b">
+          <div className="bg-gray-100 px-4 py-3 border-b flex items-center justify-between">
             <h2 className="font-semibold text-gray-700">Session Rankings</h2>
+            {sortedPlayers.length > 0 && (
+              <button
+                onClick={() => setShowLeaderboardShare(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition-colors"
+                title="Share leaderboard"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                Share
+              </button>
+            )}
           </div>
 
           {sortedPlayers.length === 0 ? (
@@ -328,13 +342,19 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
 
         {/* Branding */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-400">
-            Powered by <span className="font-semibold">PickleQ</span>
-          </p>
+          <a
+            href="https://pickleq.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-green-600 transition-colors"
+          >
+            <span>🏓</span>
+            <span>Powered by <span className="font-semibold">PickleQ</span></span>
+          </a>
         </div>
       </main>
 
-      {/* Share Modal */}
+      {/* Share Player Modal */}
       {sharePlayer && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 pb-safe">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[85vh] overflow-y-auto">
@@ -424,6 +444,25 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
             )}
           </div>
         </div>
+      )}
+
+      {/* Share Leaderboard Modal */}
+      {venue && session && (
+        <ShareLeaderboardModal
+          isOpen={showLeaderboardShare}
+          onClose={() => setShowLeaderboardShare(false)}
+          players={sortedPlayers.map(p => ({
+            name: p.playerName,
+            skill: p.skill,
+            wins: p.wins,
+            losses: p.losses,
+            gamesPlayed: p.gamesPlayed,
+          }))}
+          venueName={venue.name}
+          location={session.location}
+          totalGames={Math.round(totalGames)}
+          cardType="session"
+        />
       )}
     </div>
   );

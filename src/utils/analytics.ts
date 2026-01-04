@@ -57,6 +57,13 @@ export function trackStatsShared(cardType: 'session' | 'alltime', method: 'nativ
   });
 }
 
+export function trackLeaderboardShared(cardType: 'session' | 'alltime', method: 'native' | 'download') {
+  posthog.capture('leaderboard_shared', {
+    card_type: cardType,
+    share_method: method,
+  });
+}
+
 export function trackPublicLeaderboardViewed(venueSlug: string) {
   posthog.capture('public_leaderboard_viewed', {
     venue_slug: venueSlug,
