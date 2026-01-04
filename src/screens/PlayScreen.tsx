@@ -8,6 +8,7 @@ import { SkillSelector } from '../components/SkillSelector';
 import { UndoToast } from '../components/UndoToast';
 import { LiveStandingsModal } from '../components/LiveStandingsModal';
 import { announceNextMatch, announceWinner, isMuted, setMuted, cancelAllSpeech } from '../utils/speech';
+import { getLocalVenue } from '../utils/supabase';
 
 function formatDuration(ms: number): string {
   const totalSeconds = Math.round(ms / 1000);
@@ -43,6 +44,7 @@ export function PlayScreen() {
   const [editingSkillPlayerId, setEditingSkillPlayerId] = useState<string | null>(null);
   const [pullConfirm, setPullConfirm] = useState<{ playerId: string; matchId: string; playerName: string; court: number } | null>(null);
   const sessionPlayerNames = session.players.map(p => p.name);
+  const venue = getLocalVenue();
 
   const toggleMute = () => {
     const newMuted = !muted;
@@ -161,7 +163,10 @@ export function PlayScreen() {
       <header className="bg-gray-900 text-white px-4 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <h1 className="text-lg font-bold">{session.location}</h1>
+            <div>
+              {venue && <div className="text-xs text-gray-400">{venue.name}</div>}
+              <h1 className="text-lg font-bold">{session.location}</h1>
+            </div>
             <div className="hidden sm:flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1.5">
                 <span className="text-gray-400">GAMES</span>
