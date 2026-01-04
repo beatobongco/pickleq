@@ -177,36 +177,43 @@ export function PublicSessionScreen({ slug, sessionId }: PublicSessionScreenProp
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-emerald-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="text-4xl mb-2">🏓</div>
-          <h1 className="text-2xl font-bold text-gray-900">{venue.name}</h1>
-          <p className="text-gray-600 text-sm">Session Results</p>
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-2xl mx-auto px-4 py-2">
+          <a
+            href="https://pickleq.app"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-green-600 transition-colors"
+          >
+            <span>🏓</span>
+            <span className="font-semibold">PickleQ</span>
+          </a>
+        </div>
+        <div className="max-w-2xl mx-auto px-4 pb-4 text-center">
+          <a
+            href={`/venue/${slug}`}
+            className="text-sm text-green-600 hover:text-green-700 font-medium"
+          >
+            {venue.name}
+          </a>
+          <h1 className="text-xl font-bold text-gray-900 mt-0.5">{session.location}</h1>
+          <p className="text-gray-500 text-sm">{formatDate(session.endedAt)}</p>
+          <div className="flex justify-center gap-6 mt-3 text-sm">
+            <div>
+              <span className="font-bold text-gray-900">{totalPlayers}</span>
+              <span className="text-gray-500 ml-1">players</span>
+            </div>
+            <div>
+              <span className="font-bold text-gray-900">{Math.round(totalGames)}</span>
+              <span className="text-gray-500 ml-1">games</span>
+            </div>
+            <div>
+              <span className="font-bold text-gray-900">{session.courts}</span>
+              <span className="text-gray-500 ml-1">courts</span>
+            </div>
+          </div>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto p-4 pb-8">
-        {/* Session Info */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm mb-6">
-          <div className="text-center mb-4">
-            <div className="text-lg font-semibold text-gray-900">{session.location}</div>
-            <div className="text-sm text-gray-500">{formatDate(session.endedAt)}</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-gray-900">{totalPlayers}</div>
-              <div className="text-sm text-gray-500">Players</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">{Math.round(totalGames)}</div>
-              <div className="text-sm text-gray-500">Games</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">{session.courts}</div>
-              <div className="text-sm text-gray-500">Courts</div>
-            </div>
-          </div>
-        </div>
 
         {/* Find yourself prompt */}
         <div className="bg-green-100 rounded-xl p-4 mb-6 text-center">
